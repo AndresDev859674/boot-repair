@@ -6,7 +6,7 @@
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 ```
 
-`2.0 BETA ***possible errors or instabilities***`
+`2.0 in Process ***possible errors or instabilities***`
 
 - A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
