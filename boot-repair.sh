@@ -47,7 +47,7 @@ if [[ "$LANG_CODE" == "es" ]]; then
   T[m6]="6) Libertad de arranque (timeout, default, EFI, os-prober)"
   T[m7]="7) Diagnóstico rápido"
   T[m8]="8) Ajustes (idioma, modo experto, instalar alias)"
-  T[m9]="9) Salir"
+  T[m9]="10) Salir"
   T[enter_choice]="Elige una opción"
   T[press_enter]="Pulsa Enter para continuar..."
   T[need_root]="Este script requiere privilegios de administrador (sudo)."
@@ -84,8 +84,8 @@ if [[ "$LANG_CODE" == "es" ]]; then
   T[settings_title]="Ajustes"
   T[set_lang]="1) Cambiar idioma (ES/EN/DE/PT)"
   T[set_expert]="2) Alternar modo experto"
-  T[set_install]="3) Instalar 'bootrepair' en /usr/local/bin"
-  T[back]="4) Volver"
+  T[set_install]="3) Instalar 'bootrepair' en /usr/local/bin (Solo para repositorios GIT)"
+  T[back]="5) Volver"
   T[expert_on]="Modo experto ACTIVADO"
   T[expert_off]="Modo experto DESACTIVADO"
   T[installed_alias]="Instalado /usr/local/bin/bootrepair"
@@ -105,6 +105,10 @@ if [[ "$LANG_CODE" == "es" ]]; then
   T[update_title]="Actualizar sistema operativo"
   T[update_warn]="Esto actualizará paquetes en el sistema objetivo."
   T[updating]="Actualizando..."
+  T[set_uninstall]="4) Desinstalar 'bootrepair' de /usr/local/bin"
+  T[uninstalled_alias]="'bootrepair' eliminado de /usr/local/bin"
+  T[no_alias]="'bootrepair' no está instalado en /usr/local/bin"
+
 elif [[ "$LANG_CODE" == "de" ]]; then
   T[title]="BootRepair"
   T[gather]="Systeminformationen werden gesammelt..."
@@ -113,6 +117,9 @@ elif [[ "$LANG_CODE" == "de" ]]; then
   T[detected_mode]="Erkannter Bootmodus"
   T[secureboot]="Secure Boot Status"
   T[secure_on]="AKTIVIERT"
+  T[set_uninstall]="4) Deinstallieren Sie „bootrepair“ aus /usr/local/bin"
+  T[uninstalled_alias]="'Boot-Reparatur‘ aus /usr/local/bin entfernt"
+  T[no_alias]="'„bootrepair“ ist nicht in /usr/local/bin installiert"
   T[secure_off]="DEAKTIVIERT"
   T[secure_unknown]="Unbekannt"
   T[menu_title]="Hauptmenü"
@@ -124,7 +131,7 @@ elif [[ "$LANG_CODE" == "de" ]]; then
   T[m6]="6) Boot-Freiheit (Timeout, Default, EFI, os-prober)"
   T[m7]="7) Schnell-Diagnose"
   T[m8]="8) Einstellungen (Sprache, Expertenmodus, Alias installieren)"
-  T[m9]="9) Beenden"
+  T[m9]="10) Beenden"
   T[enter_choice]="Option wählen"
   T[press_enter]="Drücke Enter zum Fortfahren..."
   T[need_root]="Dieses Skript erfordert Administratorrechte (sudo)."
@@ -161,8 +168,8 @@ elif [[ "$LANG_CODE" == "de" ]]; then
   T[settings_title]="Einstellungen"
   T[set_lang]="1) Sprache ändern (ES/EN/DE/PT)"
   T[set_expert]="2) Expertenmodus umschalten"
-  T[set_install]="3) 'bootrepair' nach /usr/local/bin installieren"
-  T[back]="4) Zurück"
+  T[set_install]="3) 'bootrepair' nach /usr/local/bin installieren (Nur für GIT-Repositorys)"
+  T[back]="5) Zurück"
   T[expert_on]="Expertenmodus AKTIVIERT"
   T[expert_off]="Expertenmodus DEAKTIVIERT"
   T[installed_alias]="'bootrepair' wurde installiert"
@@ -191,6 +198,9 @@ elif [[ "$LANG_CODE" == "pt" ]]; then
   T[secureboot]="Status do Secure Boot"
   T[secure_on]="ATIVADO"
   T[secure_off]="DESATIVADO"
+  T[set_uninstall]="4) Desinstale 'bootrepair' de /usr/local/bin"
+  T[uninstalled_alias]="''reparo de inicialização' removido de /usr/local/bin"
+  T[no_alias]="'bootrepair' não está instalado em /usr/local/bin"
   T[secure_unknown]="Desconhecido"
   T[menu_title]="Menu principal"
   T[m1]="1) Reparar GRUB"
@@ -201,7 +211,7 @@ elif [[ "$LANG_CODE" == "pt" ]]; then
   T[m6]="6) Liberdade de boot (timeout, default, EFI, os-prober)"
   T[m7]="7) Diagnóstico rápido"
   T[m8]="8) Configurações (idioma, modo avançado, instalar alias)"
-  T[m9]="9) Sair"
+  T[m9]="10) Sair"
   T[enter_choice]="Escolha uma opção"
   T[press_enter]="Pressione Enter para continuar..."
   T[need_root]="Este script requer privilégios de administrador (sudo)."
@@ -238,8 +248,8 @@ elif [[ "$LANG_CODE" == "pt" ]]; then
   T[settings_title]="Configurações"
   T[set_lang]="1) Trocar idioma (ES/EN/DE/PT)"
   T[set_expert]="2) Alternar modo avançado"
-  T[set_install]="3) Instalar 'bootrepair' em /usr/local/bin"
-  T[back]="4) Voltar"
+  T[set_install]="3) Instalar 'bootrepair' em /usr/local/bin (Somente para repositórios GIT)"
+  T[back]="5) Voltar"
   T[expert_on]="Modo avançado ATIVADO"
   T[expert_off]="Modo avançado DESATIVADO"
   T[installed_alias]="'bootrepair' instalado"
@@ -278,7 +288,7 @@ else
   T[m6]="6) Boot freedom (timeout, default, EFI, os-prober)"
   T[m7]="7) Quick diagnostics"
   T[m8]="8) Settings (language, expert mode, install alias)"
-  T[m9]="9) Exit"
+  T[m9]="10) Exit"
   T[enter_choice]="Choose an option"
   T[press_enter]="Press Enter to continue..."
   T[need_root]="This script requires administrator privileges (sudo)."
@@ -315,8 +325,8 @@ else
   T[settings_title]="Settings"
   T[set_lang]="1) Change language (ES/EN/DE/PT)"
   T[set_expert]="2) Toggle expert mode"
-  T[set_install]="3) Install 'bootrepair' to /usr/local/bin"
-  T[back]="4) Back"
+  T[set_install]="3) Install 'bootrepair' to /usr/local/bin (Only for GIT repositories)"
+  T[back]="5) Back"
   T[expert_on]="Expert mode ENABLED"
   T[expert_off]="Expert mode DISABLED"
   T[installed_alias]="'bootrepair' installed"
@@ -336,6 +346,10 @@ else
   T[update_title]="Update operating system"
   T[update_warn]="This will update packages on the target system."
   T[updating]="Updating..."
+  T[set_uninstall]="4) Uninstall 'bootrepair' from /usr/local/bin"
+  T[uninstalled_alias]="'boot repair' removed from /usr/local/bin"
+  T[no_alias]="'bootrepair' is not installed in /usr/local/bin"
+
 fi
 
 EXPERT=false
@@ -449,285 +463,131 @@ distro_in_chroot() { local id="unknown"; [[ -f /mnt/etc/os-release ]] && . /mnt/
 # Modules
 #-----------------------
 grub_repair() {
-  # -------- Fallbacks de colores y helpers (no rompen si ya existen en el script) -----
-  : "${RED:=}"; : "${GREEN:=}"; : "${YELLOW:=}"; : "${CYAN:=}"; : "${RESET:=}"
-  _printf() { printf "%b\n" "$*"; }
+    # Colores
+    RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
 
-  # read_tty(prompt, varname)
-  if ! declare -F read_tty >/dev/null 2>&1; then
-    read_tty() { local p="$1"; local __v="$2"; read -r -p "$p" "$__v" </dev/tty; }
-  fi
-
-  # list_parts() -> NAME SIZE TYPE FSTYPE MOUNTPOINT LABEL PARTLABEL PARTTYPE (por línea)
-  if ! declare -F list_parts >/dev/null 2>&1; then
-    list_parts() { lsblk -rpno NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,LABEL,PARTLABEL,PARTTYPE; }
-  fi
-
-  # list_disks() -> lista de discos /dev/...
-  if ! declare -F list_disks >/dev/null 2>&1; then
-    list_disks() { lsblk -dpno NAME,TYPE | awk '$2=="disk"{print $1}'; }
-  fi
-
-  # select_from "Prompt" items...
-  if ! declare -F select_from >/dev/null 2>&1; then
-    select_from() {
-      local prompt="$1"; shift
-      local -a items=("$@")
-      (( ${#items[@]} > 0 )) || { _printf "${RED}No hay opciones para seleccionar.${RESET}"; return 1; }
-      _printf "${CYAN}%s:${RESET}" "$prompt"
-      local i=1; for it in "${items[@]}"; do printf "  %d) %s\n" "$i" "$it"; ((i++)); done
-      local idx; read -r -p ">> " idx </dev/tty
-      [[ "$idx" =~ ^[0-9]+$ ]] && (( idx>=1 && idx<=${#items[@]} )) || { _printf "${RED}Selección inválida.${RESET}"; return 2; }
-      printf "%s\n" "${items[$((idx-1))]}"
-    }
-  fi
-
-  # detect_targets() -> "UEFI|BIOS"
-  if ! declare -F detect_targets >/dev/null 2>&1; then
-    detect_targets() {
-      case "$(uname -m)" in
-        x86_64) echo "x86_64-efi|i386-pc" ;;
-        i686|i386) echo "i386-efi|i386-pc" ;;
-        aarch64|arm64) echo "aarch64-efi|" ;;
-        armv7l|armv8l) echo "arm-efi|" ;;
-        *) echo "x86_64-efi|i386-pc" ;;
-      esac
-    }
-  fi
-
-  # prepare_chroot ROOT [EFI]
-  if ! declare -F prepare_chroot >/dev/null 2>&1; then
-    prepare_chroot() {
-      local root_part="$1"; local efi_part="${2:-}"
-      _printf "${CYAN}Montando y preparando chroot...${RESET}"
-      mkdir -p /mnt
-      if ! mountpoint -q /mnt; then
-        mount "$root_part" /mnt || { _printf "${RED}No se pudo montar %s en /mnt${RESET}" "$root_part"; return 1; }
-      fi
-      mkdir -p /mnt/boot
-      if [[ -n "$efi_part" ]]; then
-        mkdir -p /mnt/boot/efi
-        mountpoint -q /mnt/boot/efi || mount "$efi_part" /mnt/boot/efi || {
-          _printf "${RED}No se pudo montar EFI %s en /mnt/boot/efi${RESET}" "$efi_part"; return 1; }
-      fi
-      _printf "${CYAN}Realizando bind-mounts...${RESET}"
-      for d in dev proc sys run; do
-        mountpoint -q /mnt/$d || mount --bind /$d /mnt/$d || {
-          _printf "${RED}Fallo bind %s${RESET}" "$d"; return 1; }
-      done
-      return 0
-    }
-  fi
-  # -------- Fin de fallbacks ------------------------------------------------------------
-
-  # Textos (minimos, usa los de tu tabla T si existen)
-  local TXT_WARN="${T[warn_boot]:-ADVERTENCIA: Esto modificará tu cargador de arranque.}"
-  local TXT_PROC="${T[proceed]:-¿Deseas continuar? [y/N]: }"
-  local TXT_AUTO="${T[auto_mode]:-¿Modo automático? (detectar raíz/EFI) [y/N]: }"
-  local TXT_CANCEL="${T[cancelled]:-Operación cancelada.}"
-  local TXT_SELROOT="${T[select_root]:-Elige tu partición raíz}"
-  local TXT_SELEFI="${T[select_efi]:-Elige tu partición EFI (vfat, ~100–500 MB)}"
-  local TXT_EFIHINT="${T[efi_hint]:-Sugerencia: vfat/FAT32 con etiqueta EFI/ESP.}"
-  local TXT_BIOSDISK="${T[bios_disk]:-Selecciona el disco para GRUB (BIOS/Legacy)}"
-  local TXT_DISKFROMROOT="${T[disk_from_root]:-Detectando disco desde raíz...}"
-  local TXT_SKIPDISK="${T[uefi_skip_disk]:-En UEFI no es necesario seleccionar disco.}"
-  local TXT_PKG="${T[pkg_hint]:-Asegúrate de tener instalado grub en el sistema objetivo.}"
-  local TXT_REP_FOR="${T[repairing_for]:-Reparando GRUB para}"
-  local TXT_DONE="${T[done]:-Listo.}"
-  local TXT_REBOOT="${T[reboot_now]:-¿Reiniciar ahora? [y/N]: }"
-  local TXT_REBOOTING="${T[rebooting]:-Reiniciando...}"
-  local TXT_LATER="${T[reboot_later]:-Puedes reiniciar más tarde manualmente.}"
-  local TXT_BOOTNAME="${T[boot_name]:-¿Nombre para el menú UEFI? (por defecto: Linux) >> }"
-  local TXT_AUTO_DET="${T[auto_detecting]:-Detectando automáticamente particiones...}"
-  local TXT_AUTO_FAIL="${T[auto_fail]:-No se pudo detectar automáticamente. Cambiando a selección manual.}"
-  local TXT_SELECTED="${T[selected]:-Seleccionado}"
-
-  # Confirmación
-  _printf "${YELLOW}%s${RESET}" "$TXT_WARN"
-  local ok; read_tty "$TXT_PROC" ok
-  [[ "$ok" =~ ^[Yy]$ ]] || { _printf "${RED}%s${RESET}" "$TXT_CANCEL"; return 0; }
-
-  # Detectar modo
-  local mode="UEFI"; [[ -d /sys/firmware/efi/efivars ]] || mode="BIOS"
-
-  # Modo auto/manual
-  local auto; read_tty "$TXT_AUTO" auto
-
-  # Autodetección
-  local ROOT_PART=""; local EFI_PART=""
-  if [[ "$auto" =~ ^[Yy]$ ]]; then
-    _printf "${CYAN}%s${RESET}" "$TXT_AUTO_DET"
-    # Root: mayor tamaño entre fs Linux conocidos
-    ROOT_PART=$(list_parts | awk '$3=="part" && ($4=="ext4"||$4=="btrfs"||$4=="xfs"||$4=="f2fs"){print $1" "$2}' \
-                | sort -k2 -h | tail -n1 | awk '{print $1}')
-    # EFI: preferir etiqueta/parttype de ESP
-    EFI_PART=""
-    if [[ "$mode" == "UEFI" ]]; then
-      EFI_PART=$(list_parts | awk '$3=="part" && ($4=="vfat"||$4=="fat32"){print $1" "$6" "$7" "$8}' \
-        | awk 'tolower($2) ~ /(^|.*)efi(.*)|(^|.*)esp(.*)/ || tolower($3) ~ /efi|esp/ {print $1; found=1} END{if(!found) exit 1}' 2>/dev/null) || true
-      [[ -z "$EFI_PART" ]] && EFI_PART=$(list_parts | awk '$3=="part" && ($4=="vfat"||$4=="fat32"){print $1}' | head -n1)
-    fi
-    # Mostrar resultados
-    if [[ -n "$ROOT_PART" && ( "$mode" != "UEFI" || -n "$EFI_PART" ) ]]; then
-      _printf "${GREEN}%s ROOT:${RESET} %s" "$TXT_SELECTED" "$ROOT_PART"
-      [[ -n "$EFI_PART" ]] && _printf "${GREEN}%s EFI:${RESET} %s" "$TXT_SELECTED" "$EFI_PART"
+    # Detectar distribución
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        DISTRO=$ID
     else
-      _printf "${YELLOW}%s${RESET}" "$TXT_AUTO_FAIL"
+        echo -e "${RED}No se pudo detectar la distribución.${RESET}"
+        return 1
     fi
-  fi
+    echo -e "${GREEN}Distribución detectada:${RESET} $DISTRO"
 
-  # Selección manual si faltan datos
-  if [[ -z "$ROOT_PART" ]]; then
-    local -a roots=()
-    while IFS= read -r line; do
-      local n s f l; n=$(awk '{print $1}' <<<"$line"); s=$(awk '{print $2}' <<<"$line"); f=$(awk '{print $4}' <<<"$line"); l=$(awk '{print $6}' <<<"$line")
-      case "$f" in ext2|ext3|ext4|btrfs|xfs|f2fs) roots+=("$n  [$s]  fs:$f label:${l:-}") ;; esac
-    done < <(list_parts)
-    local sel; sel=$(select_from "$TXT_SELROOT" "${roots[@]}") || return 1
-    ROOT_PART=$(awk '{print $1}' <<<"$sel")
-  fi
+    # Seleccionar modo de arranque
+    echo -e "${CYAN}Selecciona el modo de arranque:${RESET}"
+    echo "1) UEFI (recomendado)"
+    echo "2) BIOS (Legacy)"
+    read -rp "Opción [1/2]: " BOOT_MODE
+    if [ "$BOOT_MODE" != "1" ] && [ "$BOOT_MODE" != "2" ]; then
+        echo -e "${RED}Opción inválida. Usando UEFI por defecto.${RESET}"
+        BOOT_MODE=1
+    fi
 
-  if [[ "$mode" == "UEFI" && -z "$EFI_PART" ]]; then
-    _printf "${YELLOW}%s${RESET}" "$TXT_EFIHINT"
-    local -a efis=()
-    while IFS= read -r line; do
-      local n s f l; n=$(awk '{print $1}' <<<"$line"); s=$(awk '{print $2}' <<<"$line"); f=$(awk '{print $4}' <<<"$line"); l=$(awk '{print $6}' <<<"$line")
-      [[ "$f" == "vfat" || "$f" == "fat32" ]] && efis+=("$n  [$s]  fs:$f label:${l:-}")
-    done < <(list_parts)
-    local sel; sel=$(select_from "$TXT_SELEFI" "${efis[@]}") || return 1
-    EFI_PART=$(awk '{print $1}' <<<"$sel")
-  fi
+    # Confirmar reparación
+    echo -e "${YELLOW}ADVERTENCIA:${RESET} Esto modificará el gestor de arranque."
+    read -rp "¿Deseas continuar? [y/N]: " CONFIRM
+    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Operación cancelada.${RESET}"
+        return 0
+    fi
 
-  # Disco para BIOS
-  local INSTALL_DISK=""
-  if [[ "$mode" == "BIOS" ]]; then
-    _printf "${CYAN}%s${RESET}" "$TXT_DISKFROMROOT"
-    local rootdisk; rootdisk=$(lsblk -no PKNAME "$ROOT_PART" 2>/dev/null || true)
-    [[ -z "$rootdisk" ]] && rootdisk=$(basename "$ROOT_PART" | sed -E 's/p?[0-9]+$//')
-    local -a disks=(); local d
-    while IFS= read -r d; do
-      if [[ "$(basename "$d")" == "$rootdisk" ]]; then disks+=("$d  [root-disk]"); else disks+=("$d"); fi
-    done < <(list_disks)
-    local ds; ds=$(select_from "$TXT_BIOSDISK" "${disks[@]}") || return 1
-    INSTALL_DISK=$(awk '{print $1}' <<<"$ds")
-  else
-    _printf "${GREEN}%s${RESET}" "$TXT_SKIPDISK"
-  fi
+    # Montar particiones
+    read -rp "Introduce tu partición raíz (ej: /dev/sda2): " ROOT_PART
+    if [ "$BOOT_MODE" = "1" ]; then
+        read -rp "Introduce tu partición EFI (ej: /dev/sda1): " EFI_PART
+    fi
+    echo -e "${CYAN}Montando particiones...${RESET}"
+    sudo mount "$ROOT_PART" /mnt
+    if [ "$BOOT_MODE" = "1" ]; then
+        sudo mount "$EFI_PART" /mnt/boot/efi
+    fi
 
-  # Preparar chroot
-  prepare_chroot "$ROOT_PART" "${EFI_PART:-}" || { _printf "${RED}No se pudo preparar el chroot.${RESET}"; return 1; }
+    # Reparar GRUB según la distro
+    case "$DISTRO" in
+        arch|endeavouros|cachyos)
+            echo -e "${YELLOW}Reparando GRUB en Arch-based...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                sudo pacman -Sy arch-install-scripts
+                sudo arch-chroot /mnt /bin/bash -c "
+                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    grub-mkconfig -o /boot/grub/grub.cfg
+                "
+            else
+                sudo pacman -Sy arch-install-scripts
+                sudo arch-chroot /mnt /bin/bash -c "
+                    grub-install --target=i386-pc /dev/sda &&
+                    grub-mkconfig -o /boot/grub/grub.cfg
+                "
+            fi
+            ;;
+        debian|ubuntu)
+            echo -e "${YELLOW}Reparando GRUB en Debian/Ubuntu...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                sudo chroot /mnt /bin/bash -c "
+                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    update-grub
+                "
+            else
+                sudo chroot /mnt /bin/bash -c "
+                    grub-install --target=i386-pc /dev/sda &&
+                    update-grub
+                "
+            fi
+            ;;
+        fedora)
+            echo -e "${YELLOW}Reparando GRUB en Fedora...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                sudo chroot /mnt /bin/bash -c "
+                    grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
+            else
+                sudo chroot /mnt /bin/bash -c "
+                    grub2-install --target=i386-pc /dev/sda &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
+            fi
+            ;;
+        opensuse*|suse)
+            echo -e "${YELLOW}Reparando GRUB en openSUSE...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                sudo chroot /mnt /bin/bash -c "
+                    grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
+            else
+                sudo chroot /mnt /bin/bash -c "
+                    grub2-install --target=i386-pc /dev/sda &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
+            fi
+            ;;
+        nixos)
+            echo -e "${YELLOW}Reparando GRUB en NixOS...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                sudo nixos-enter /mnt --command "
+                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    nixos-rebuild boot
+                "
+            else
+                sudo nixos-enter /mnt --command "
+                    grub-install --target=i386-pc /dev/sda &&
+                    nixos-rebuild boot
+                "
+            fi
+            ;;
+        *)
+            echo -e "${RED}Distribución no soportada: $DISTRO${RESET}"
+            return 1
+            ;;
+    esac
 
-  # Detectar distro dentro del chroot
-  local distro="unknown" PRETTY=""
-  if [[ -f /mnt/etc/os-release ]]; then
-    . /mnt/etc/os-release
-    distro="$ID"; PRETTY="${PRETTY_NAME:-$ID}"
-  fi
-
-  # Nombre de arranque UEFI
-  local BOOT_NAME
-  read_tty "$TXT_BOOTNAME" BOOT_NAME
-  if [[ -z "$BOOT_NAME" ]]; then
-    # Usa un nombre bonito si lo hay, si no "Linux"
-    BOOT_NAME="${PRETTY:-Linux}"
-    # Evitar espacios raros en directorios EFI, sustitúyelos por _
-    BOOT_NAME="${BOOT_NAME// /_}"
-  fi
-
-  # Targets
-  IFS="|" read -r UEFI_TARGET BIOS_TARGET <<<"$(detect_targets)"
-
-  # Mensajes
-  _printf "${YELLOW}%s:%s %s${RESET}" "$TXT_REP_FOR" "" "$distro"
-  _printf "${YELLOW}%s${RESET}" "$TXT_PKG"
-
-  # Ejecutar reparación
-  if [[ "$mode" == "UEFI" && -z "$UEFI_TARGET" ]]; then
-    _printf "${RED}Arquitectura no soporta target UEFI auto.${RESET}"; return 1
-  fi
-  if [[ "$mode" == "BIOS" && -z "$BIOS_TARGET" ]]; then
-    _printf "${RED}Arquitectura no soporta target BIOS auto.${RESET}"; return 1
-  fi
-
-  case "$distro" in
-    arch|endeavouros|cachyos)
-      if [[ "$mode" == "UEFI" ]]; then
-        chroot /mnt /bin/bash -c "grub-install --target='$UEFI_TARGET' --efi-directory=/boot/efi --bootloader-id='$BOOT_NAME' && grub-mkconfig -o /boot/grub/grub.cfg" \
-          || { _printf "${RED}Falló grub-install/mkconfig (Arch-based).${RESET}"; return 1; }
-      else
-        chroot /mnt /bin/bash -c "grub-install --target='$BIOS_TARGET' '$INSTALL_DISK' && grub-mkconfig -o /boot/grub/grub.cfg" \
-          || { _printf "${RED}Falló grub-install/mkconfig (Arch-based BIOS).${RESET}"; return 1; }
-      fi
-      ;;
-    debian|ubuntu|linuxmint|pop)
-      if [[ "$mode" == "UEFI" ]]; then
-        chroot /mnt /bin/bash -c "grub-install --target='$UEFI_TARGET' --efi-directory=/boot/efi --bootloader-id='$BOOT_NAME' && update-grub" \
-          || { _printf "${RED}Falló grub-install/update-grub (Debian/Ubuntu).${RESET}"; return 1; }
-      else
-        chroot /mnt /bin/bash -c "grub-install --target='$BIOS_TARGET' '$INSTALL_DISK' && update-grub" \
-          || { _printf "${RED}Falló grub-install/update-grub (Debian/Ubuntu BIOS).${RESET}"; return 1; }
-      fi
-      ;;
-    fedora)
-      if [[ "$mode" == "UEFI" ]]; then
-        chroot /mnt /bin/bash -c "grub2-install --target='$UEFI_TARGET' --efi-directory=/boot/efi --bootloader-id='$BOOT_NAME' && grub2-mkconfig -o /boot/grub2/grub.cfg" \
-          || { _printf "${RED}Falló grub2-install/mkconfig (Fedora).${RESET}"; return 1; }
-      else
-        chroot /mnt /bin/bash -c "grub2-install --target='$BIOS_TARGET' '$INSTALL_DISK' && grub2-mkconfig -o /boot/grub2/grub.cfg" \
-          || { _printf "${RED}Falló grub2-install/mkconfig (Fedora BIOS).${RESET}"; return 1; }
-      fi
-      ;;
-    opensuse*|suse|opensuse-tumbleweed|opensuse-leap)
-      if [[ "$mode" == "UEFI" ]]; then
-        chroot /mnt /bin/bash -c "grub2-install --target='$UEFI_TARGET' --efi-directory=/boot/efi --bootloader-id='$BOOT_NAME' && grub2-mkconfig -o /boot/grub2/grub.cfg" \
-          || { _printf "${RED}Falló grub2-install/mkconfig (openSUSE).${RESET}"; return 1; }
-      else
-        chroot /mnt /bin/bash -c "grub2-install --target='$BIOS_TARGET' '$INSTALL_DISK' && grub2-mkconfig -o /boot/grub2/grub.cfg" \
-          || { _printf "${RED}Falló grub2-install/mkconfig (openSUSE BIOS).${RESET}"; return 1; }
-      fi
-      ;;
-    nixos)
-      _printf "${YELLOW}%s${RESET}" "${T[nixos_hint]:-En NixOS los cambios se aplican con nixos-rebuild.}"
-      if command -v nixos-enter >/dev/null 2>&1; then
-        if [[ "$mode" == "UEFI" ]]; then
-          nixos-enter /mnt --command "grub-install --target='$UEFI_TARGET' --efi-directory=/boot/efi --bootloader-id='$BOOT_NAME' || true; nixos-rebuild boot" \
-            || { _printf "${RED}Falló nixos-enter grub-install/nixos-rebuild.${RESET}"; return 1; }
-        else
-          nixos-enter /mnt --command "grub-install --target='$BIOS_TARGET' '$INSTALL_DISK' || true; nixos-rebuild boot" \
-            || { _printf "${RED}Falló nixos-enter (BIOS).${RESET}"; return 1; }
-        fi
-      else
-        if [[ "$mode" == "UEFI" ]]; then
-          chroot /mnt /bin/bash -c "grub-install --target='$UEFI_TARGET' --efi-directory=/boot/efi --bootloader-id='$BOOT_NAME' || true; nixos-rebuild boot" \
-            || { _printf "${RED}Falló chroot grub-install/nixos-rebuild.${RESET}"; return 1; }
-        else
-          chroot /mnt /bin/bash -c "grub-install --target='$BIOS_TARGET' '$INSTALL_DISK' || true; nixos-rebuild boot" \
-            || { _printf "${RED}Falló chroot (BIOS).${RESET}"; return 1; }
-        fi
-      fi
-      ;;
-    *)
-      _printf "${RED}Distribución no soportada dentro del chroot: %s${RESET}" "$distro"
-      return 1
-      ;;
-  esac
-
-  # Mostrar entradas EFI si aplica
-  if [[ "$mode" == "UEFI" ]] && command -v efibootmgr >/dev/null 2>&1; then
-    _printf "${CYAN}Entradas EFI actuales:${RESET}"
-    efibootmgr || true
-  fi
-
-  _printf "${GREEN}%s${RESET}" "$TXT_DONE"
-  local R; read_tty "$TXT_REBOOT" R
-  if [[ "$R" =~ ^[Yy]$ ]]; then
-    _printf "${YELLOW}%s${RESET}" "$TXT_REBOOTING"
-    reboot
-  else
-    _printf "${GREEN}%s${RESET}" "$TXT_LATER"
-  fi
-  return 0
+    echo -e "${GREEN}Reparación de GRUB completada.${RESET}"
 }
+
 
 monitor_repair() {
   echo -e "${CYAN}${T[gpu_note]}${RESET}"
@@ -921,6 +781,7 @@ settings_menu() {
     echo "${T[set_lang]}"
     echo "${T[set_expert]}"
     echo "${T[set_install]}"
+    echo "${T[set_uninstall]}"
     echo "${T[back]}"
     local c; read -r -p ">> " c </dev/tty
     case "$c" in
@@ -945,11 +806,50 @@ settings_menu() {
           echo -e "${GREEN}${T[installed_alias]}${RESET}"
         fi
         ;;
-      4) break ;;
+      4)
+        if [[ -f /usr/local/bin/bootrepair ]]; then
+          rm -f /usr/local/bin/bootrepair
+          echo -e "${GREEN}${T[uninstalled_alias]}${RESET}"
+        else
+          echo -e "${YELLOW}${T[no_alias]}${RESET}"
+        fi
+        ;;
+      5) break ;;
       *) echo -e "${RED}${T[invalid_sel]}${RESET}" ;;
     esac
   done
 }
+
+alias_menu() {
+  while true; do
+      echo -e "${CYAN}"
+  cat << "EOF"
+ __  __                                         ___                           
+/\ \/\ \          __                           /\_ \    __                    
+\ \ \ \ \    ____/\_\    ___      __       __  \//\ \  /\_\     __      ____  
+ \ \ \ \ \  /',__\/\ \ /' _ `\  /'_ `\   /'__`\  \ \ \ \/\ \  /'__`\   /',__\ 
+  \ \ \_\ \/\__, `\ \ \/\ \/\ \/\ \L\ \ /\ \L\.\_ \_\ \_\ \ \/\ \L\.\_/\__, `\
+   \ \_____\/\____/\ \_\ \_\ \_\ \____ \\ \__/.\_\/\____\\ \_\ \__/.\_\/\____/
+    \/_____/\/___/  \/_/\/_/\/_/\/___L\ \\/__/\/_/\/____/ \/_/\/__/\/_/\/___/ 
+                                  /\____/                                     
+                                  \_/__/  
+EOF
+  echo -e "${RESET}"
+  echo -e "${YELLOW}=== ${T[title]} v2.0 ===${RESET}"
+    echo "Quick flags: -grub -monitor -initramfs -kernel -diag -update -bootcfg -auto"
+    echo "These are to go faster without selections"
+    echo ''
+    echo 'What is this?'
+    echo 'Simple, just use sudo ./boot-repair.sh or sudo boot-repair and add a -string for example -update'
+    echo ''
+    echo 'Write exit to test or just exit'
+    local c; read -r -p ">> " c </dev/tty
+    case "$c" in
+    exit) break ;;
+    esac
+  done
+}
+
 
 #-----------------------
 # Menu
@@ -967,6 +867,7 @@ main_menu() {
     echo "${T[m6]}"
     echo "${T[m7]}"
     echo "${T[m8]}"
+    echo "9) Aliases"
     echo "${T[m9]}"
     local choice; read -r -p "${T[enter_choice]} >> " choice </dev/tty
     case "$choice" in
@@ -978,7 +879,8 @@ main_menu() {
       6) boot_freedom ;;
       7) diagnostics ;;
       8) settings_menu ;;
-      9) break ;;
+      9) alias_menu ;;
+      10) break ;;
       *) echo -e "${RED}${T[invalid_sel]}${RESET}"; sleep 1 ;;
     esac
   done
@@ -998,6 +900,7 @@ case "${1:-}" in
   -diag) diagnostics; exit 0 ;;
   -update) update_system; exit 0 ;;
   -bootcfg) boot_freedom; exit 0 ;;
+  -aliases) alias_menu; exit 0 ;;
   -auto)
     # Fire-and-forget: try to auto-repair GRUB with defaults
     auto_detect_parts >/tmp/bootrepair_auto 2>/dev/null || true
