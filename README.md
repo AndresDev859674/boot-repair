@@ -61,7 +61,7 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 
 ---
 
-## How to Use
+## Installing form GIT (***For all Distros! + more time...***)
 
 1. **Clone the repository**
     ```bash
@@ -91,13 +91,35 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 
 ---
 
+
+## Installing in AUR (For Arch Users)
+
+1. **Installing form AUR**
+   Just install from AUR using yay!
+    ```bash
+    yay -S boot-repair-andres
+    ```
+
+4. **Run the script**
+    ```bash
+    sudo boot-repair
+    ```
+    Put your Password
+
+4. **Follow the on-screen instructions**  
+   The script will:
+   - Select options
+   - Make options and more
+
+---
+
 ## ⚠️ Notes
 - Run this script **only** from a live environment — not from your main OS.  
 - Make sure you have **internet access** during the process (some distros require it for package installation).  
 
 ---
 
-## installing alias
+## installing alias (For Git versions)
 - Open **boot-repair** and select options and installed alias in Option *3*
 - and the process ends
 
