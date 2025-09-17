@@ -100,6 +100,11 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 ## installing alias
 - Open **boot-repair** and select options and installed alias in Option *3*
 - and the process ends
+
+##### Using Alias with -string
+- Quick flags: `-grub` `-monitor` `-initramfs` `-kernel` `-diag` `-update` `-bootcfg` `-auto`
+- These are to go faster without selections
+  
 ---
 
 ## Repair GNU/GRUB and working
