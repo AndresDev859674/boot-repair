@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #========================================================
-#  BootRepair v2.0
+#  BootRepair v0.1.0 Dev
 #  License: MIT
 #  Description: Swiss-army live rescue tool: GRUB repair, display reset,
 #               initramfs, kernel, system update, boot freedom, diagnostics.
@@ -16,12 +16,12 @@ START_TIME=$(date +%s)
 RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; BLUE="\e[34m"; CYAN="\e[36m"; RESET="\e[0m"
 
 #-----------------------
-# Language (ES/EN/DE/PT)
+# Language (EN/ES/DE/PT)
 #-----------------------
-LANG_CODE="es"
+LANG_CODE="en"
 case "${LANG:-es}" in
-  es_*|es) LANG_CODE="es" ;;
   en_*|en) LANG_CODE="en" ;;
+  es_*|es) LANG_CODE="es" ;;
   de_*|de) LANG_CODE="de" ;;
   pt_*|pt) LANG_CODE="pt" ;;
   *) LANG_CODE="en" ;;
@@ -82,10 +82,10 @@ if [[ "$LANG_CODE" == "es" ]]; then
   T[kernel_note]="Se intentará reinstalar el kernel con el gestor de paquetes."
   T[diag_title]="Diagnóstico de sistema"
   T[settings_title]="Ajustes"
-  T[set_lang]="1) Cambiar idioma (ES/EN/DE/PT)"
+  T[set_lang]="1) Cambiar idioma (EN/ES/DE/PT)"
   T[set_expert]="2) Alternar modo experto"
-  T[set_install]="3) Instalar 'bootrepair' en /usr/local/bin (Solo para repositorios GIT)"
-  T[back]="5) Volver"
+  T[set_install]="3) Instalar 'bootrepair' en /usr/local/bin (Solo para version de GIT)"
+  T[back]="7) Volver"
   T[expert_on]="Modo experto ACTIVADO"
   T[expert_off]="Modo experto DESACTIVADO"
   T[installed_alias]="Instalado /usr/local/bin/bootrepair"
@@ -166,10 +166,10 @@ elif [[ "$LANG_CODE" == "de" ]]; then
   T[kernel_note]="Kernel wird über Paketverwaltung neu installiert."
   T[diag_title]="Systemdiagnose"
   T[settings_title]="Einstellungen"
-  T[set_lang]="1) Sprache ändern (ES/EN/DE/PT)"
+  T[set_lang]="1) Sprache ändern (EN/ES/DE/PT)"
   T[set_expert]="2) Expertenmodus umschalten"
-  T[set_install]="3) 'bootrepair' nach /usr/local/bin installieren (Nur für GIT-Repositorys)"
-  T[back]="5) Zurück"
+  T[set_install]="3) 'bootrepair' nach /usr/local/bin installieren (Nur für die GIT-Version)"
+  T[back]="7) Zurück"
   T[expert_on]="Expertenmodus AKTIVIERT"
   T[expert_off]="Expertenmodus DEAKTIVIERT"
   T[installed_alias]="'bootrepair' wurde installiert"
@@ -246,10 +246,10 @@ elif [[ "$LANG_CODE" == "pt" ]]; then
   T[kernel_note]="Tentará reinstalar o kernel pelo gerenciador de pacotes."
   T[diag_title]="Diagnóstico do sistema"
   T[settings_title]="Configurações"
-  T[set_lang]="1) Trocar idioma (ES/EN/DE/PT)"
+  T[set_lang]="1) Trocar idioma (EN/ES/DE/PT)"
   T[set_expert]="2) Alternar modo avançado"
-  T[set_install]="3) Instalar 'bootrepair' em /usr/local/bin (Somente para repositórios GIT)"
-  T[back]="5) Voltar"
+  T[set_install]="3) Instalar 'bootrepair' em /usr/local/bin (Somente para a versão GIT)"
+  T[back]="7) Voltar"
   T[expert_on]="Modo avançado ATIVADO"
   T[expert_off]="Modo avançado DESATIVADO"
   T[installed_alias]="'bootrepair' instalado"
@@ -323,10 +323,10 @@ else
   T[kernel_note]="Will try to reinstall kernel via package manager."
   T[diag_title]="System diagnostics"
   T[settings_title]="Settings"
-  T[set_lang]="1) Change language (ES/EN/DE/PT)"
+  T[set_lang]="1) Change language (EN/ES/DE/PT)"
   T[set_expert]="2) Toggle expert mode"
-  T[set_install]="3) Install 'bootrepair' to /usr/local/bin (Only for GIT repositories)"
-  T[back]="5) Back"
+  T[set_install]="3) Install 'bootrepair' to /usr/local/bin (Only for GIT version)"
+  T[back]="7) Back"
   T[expert_on]="Expert mode ENABLED"
   T[expert_off]="Expert mode DISABLED"
   T[installed_alias]="'bootrepair' installed"
@@ -367,7 +367,7 @@ ascii_banner() {
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} v2.0 ===${RESET}"
+  echo -e "${YELLOW}=== ${T[title]} v0.1.0 Dev ===${RESET}"
 }
 
 pause() { read -r -p "${T[press_enter]}" _ </dev/tty; }
@@ -791,15 +791,17 @@ settings_menu() {
     echo "${T[set_expert]}"
     echo "${T[set_install]}"
     echo "${T[set_uninstall]}"
+    echo "5) Update boot-repair GIT (UNDER IN PROCESS)"
+    echo "6) Update boot-repair AUR"
     echo "${T[back]}"
     local c; read -r -p ">> " c </dev/tty
     case "$c" in
       1)
         case "$LANG_CODE" in
-          es) LANG=en ;;
+          es) LANG=es ;;
           en) LANG=de ;;
           de) LANG=pt ;;
-          *) LANG=es ;;
+          *) LANG=en ;;
         esac
         exec "$0"
         ;;
@@ -823,7 +825,31 @@ settings_menu() {
           echo -e "${YELLOW}${T[no_alias]}${RESET}"
         fi
         ;;
-      5) break ;;
+      5)
+        REPO_DIR="$HOME/boot-repair"
+        REPO_URL="https://github.com/AndresDev859674/boot-repair.git"
+
+        if [[ -d "$REPO_DIR/.git" ]]; then
+          echo -e "${YELLOW}Updating existing repository...${RESET}"
+          cd "$REPO_DIR" || { echo "Error: could not enter $REPO_DIR"; break; }
+          git pull
+        else
+          echo -e "${YELLOW}Cloning repository...${RESET}"
+          git clone "$REPO_URL" "$REPO_DIR"
+          cd "$REPO_DIR" || { echo "Error: could not enter $REPO_DIR"; break; }
+        fi
+
+        chmod +x boot-repair.sh
+        echo -e "${GREEN}Running boot-repair.sh as administrator...${RESET}"
+        sudo ./boot-repair.sh
+
+        break
+        ;;
+      6)
+        echo -e "${RED}Just for update use a other Command Line and put the next command : yay -S boot-repair-andres ${RESET}"
+        pause
+        ;;
+      7) break ;;
       *) echo -e "${RED}${T[invalid_sel]}${RESET}" ;;
     esac
   done
@@ -844,7 +870,7 @@ alias_menu() {
                                   \_/__/  
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} v2.0 ===${RESET}"
+  echo -e "${YELLOW}=== Using Alias / Tutorial ===${RESET}"
     echo "Quick flags: -grub -monitor -initramfs -kernel -diag -update -bootcfg -auto"
     echo "These are to go faster without selections"
     echo ''
@@ -859,15 +885,63 @@ EOF
   done
 }
 
+changelog_menu() {
+  while true; do
+      echo -e "${CYAN}"
+  cat << "EOF"
+.---------------------------------------------------------------------.
+|     ___           ___           ___           ___           ___     |
+|    /\  \         /\__\         /\  \         /\__\         /\  \    |
+|   /::\  \       /:/  /        /::\  \       /::|  |       /::\  \   |
+|  /:/\:\  \     /:/__/        /:/\:\  \     /:|:|  |      /:/\:\  \  |
+| /:/  \:\  \   /::\  \ ___   /::\~\:\  \   /:/|:|  |__   /:/  \:\  \ |
+|/:/__/ \:\__\ /:/\:\  /\__\ /:/\:\ \:\__\ /:/ |:| /\__\ /:/__/_\:\__\|
+|\:\  \  \/__/ \/__\:\/:/  / \/__\:\/:/  / \/__|:|/:/  / \:\  /\ \/__/|
+| \:\  \            \::/  /       \::/  /      |:/:/  /   \:\ \:\__\  |
+|  \:\  \           /:/  /        /:/  /       |::/  /     \:\/:/  /  |
+|   \:\__\         /:/  /        /:/  /        /:/  /       \::/  /   |
+|    \/__/         \/__/         \/__/         \/__/         \/__/    |
+|     ___           ___       ___           ___                       |
+|    /\  \         /\__\     /\  \         /\  \                      |
+|   /::\  \       /:/  /    /::\  \       /::\  \                     |
+|  /:/\:\  \     /:/  /    /:/\:\  \     /:/\:\  \                    |
+| /::\~\:\  \   /:/  /    /:/  \:\  \   /:/  \:\  \                   |
+|/:/\:\ \:\__\ /:/__/    /:/__/ \:\__\ /:/__/_\:\__\                  |
+|\:\~\:\ \/__/ \:\  \    \:\  \ /:/  / \:\  /\ \/__/                  |
+| \:\ \:\__\    \:\  \    \:\  /:/  /   \:\ \:\__\                    |
+|  \:\ \/__/     \:\  \    \:\/:/  /     \:\/:/  /                    |
+|   \:\__\        \:\__\    \::/  /       \::/  /                     |
+|    \/__/         \/__/     \/__/         \/__/                      |
+'---------------------------------------------------------------------'
+EOF
+  echo -e "${RESET}"
+  echo -e "${YELLOW}=== Changelog ===${RESET}"
+    echo "Changelog, Current version 1.0 (COMPLETE VERSION)"
+    echo ''
+    echo "Added :"
+    echo 'Beta'
+    echo ''
+    echo 'Write exit to exit'
+    local c; read -r -p ">> " c </dev/tty
+    case "$c" in
+    exit) break ;;
+    esac
+  done
+}
+
 
 #-----------------------
 # Menu
 #-----------------------
 main_menu() {
   while true; do
+    clear
     ascii_banner
     info_header
     echo -e "${YELLOW}=== ${T[menu_title]} ===${RESET}"
+    echo ""
+    echo "The Next Update will have more language support! This (0.1.0) version has some things in English, so switch to English if you're on this version."
+    echo ""
     echo "${T[m1]}"
     echo "${T[m2]}"
     echo "${T[m3]}"
@@ -876,7 +950,7 @@ main_menu() {
     echo "${T[m6]}"
     echo "${T[m7]}"
     echo "${T[m8]}"
-    echo "9) Aliases"
+    echo "9) Aliases (Only for Git)"
     echo "${T[m9]}"
     local choice; read -r -p "${T[enter_choice]} >> " choice </dev/tty
     case "$choice" in
@@ -910,6 +984,7 @@ case "${1:-}" in
   -update) update_system; exit 0 ;;
   -bootcfg) boot_freedom; exit 0 ;;
   -aliases) alias_menu; exit 0 ;;
+  -changelog) changelog_menu; exit 0 ;;
   -auto)
     # Fire-and-forget: try to auto-repair GRUB with defaults
     auto_detect_parts >/tmp/bootrepair_auto 2>/dev/null || true
