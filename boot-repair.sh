@@ -463,110 +463,120 @@ distro_in_chroot() { local id="unknown"; [[ -f /mnt/etc/os-release ]] && . /mnt/
 # Modules
 #-----------------------
 grub_repair() {
-    # Colores
+    # Colors
     RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
 
-    # Detectar distribución
+    # Detect distribution
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         DISTRO=$ID
     else
-        echo -e "${RED}No se pudo detectar la distribución.${RESET}"
+        echo -e "${RED}Cannot detect your distribution.${RESET}"
         return 1
     fi
-    echo -e "${GREEN}Distribución detectada:${RESET} $DISTRO"
+    echo -e "${GREEN}Detected distribution:${RESET} $DISTRO"
 
-    # Seleccionar modo de arranque
-    echo -e "${CYAN}Selecciona el modo de arranque:${RESET}"
-    echo "1) UEFI (recomendado)"
+    # Select boot mode
+    echo -e "${CYAN}Select boot mode:${RESET}"
+    echo "1) UEFI (recommended)"
     echo "2) BIOS (Legacy)"
-    read -rp "Opción [1/2]: " BOOT_MODE
+    read -rp "Choice [1/2]: " BOOT_MODE
     if [ "$BOOT_MODE" != "1" ] && [ "$BOOT_MODE" != "2" ]; then
-        echo -e "${RED}Opción inválida. Usando UEFI por defecto.${RESET}"
+        echo -e "${RED}Invalid choice. Defaulting to UEFI.${RESET}"
         BOOT_MODE=1
     fi
 
-    # Confirmar reparación
-    echo -e "${YELLOW}ADVERTENCIA:${RESET} Esto modificará el gestor de arranque."
-    read -rp "¿Deseas continuar? [y/N]: " CONFIRM
+    # Confirm repair
+    echo -e "${YELLOW}WARNING:${RESET} This will modify your bootloader."
+    read -rp "Do you want to proceed? [y/N]: " CONFIRM
     if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Operación cancelada.${RESET}"
+        echo -e "${RED}Operation cancelled.${RESET}"
         return 0
     fi
 
-    # Montar particiones
-    read -rp "Introduce tu partición raíz (ej: /dev/sda2): " ROOT_PART
+    # Mount partitions
+    read -rp "Enter your root partition (e.g., /dev/sda2): " ROOT_PART
     if [ "$BOOT_MODE" = "1" ]; then
-        read -rp "Introduce tu partición EFI (ej: /dev/sda1): " EFI_PART
+        read -rp "Enter your EFI partition (e.g., /dev/sda1): " EFI_PART
     fi
-    echo -e "${CYAN}Montando particiones...${RESET}"
+    echo -e "${CYAN}Mounting partitions...${RESET}"
     sudo mount "$ROOT_PART" /mnt
     if [ "$BOOT_MODE" = "1" ]; then
         sudo mount "$EFI_PART" /mnt/boot/efi
     fi
 
-    # Reparar GRUB según la distro
+    # Helper: run commands in chroot (prefers arch-chroot if available)
+    run_in_chroot() {
+        if command -v arch-chroot >/dev/null; then
+            sudo arch-chroot /mnt /bin/bash -c "$1"
+        else
+            sudo mount --bind /dev /mnt/dev
+            sudo mount --bind /proc /mnt/proc
+            sudo mount --bind /sys /mnt/sys
+            sudo chroot /mnt /bin/bash -c "$1"
+        fi
+    }
+
+    # Repair GRUB based on distro
     case "$DISTRO" in
         arch|endeavouros|cachyos)
-            echo -e "${YELLOW}Reparando GRUB en Arch-based...${RESET}"
+            echo -e "${YELLOW}Running Arch-based GRUB repair...${RESET}"
             if [ "$BOOT_MODE" = "1" ]; then
-                sudo pacman -Sy arch-install-scripts
-                sudo arch-chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
                     grub-mkconfig -o /boot/grub/grub.cfg
                 "
             else
-                sudo pacman -Sy arch-install-scripts
-                sudo arch-chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub-install --target=i386-pc /dev/sda &&
                     grub-mkconfig -o /boot/grub/grub.cfg
                 "
             fi
             ;;
         debian|ubuntu)
-            echo -e "${YELLOW}Reparando GRUB en Debian/Ubuntu...${RESET}"
+            echo -e "${YELLOW}Running Debian/Ubuntu GRUB repair...${RESET}"
             if [ "$BOOT_MODE" = "1" ]; then
-                sudo chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
                     update-grub
                 "
             else
-                sudo chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub-install --target=i386-pc /dev/sda &&
                     update-grub
                 "
             fi
             ;;
         fedora)
-            echo -e "${YELLOW}Reparando GRUB en Fedora...${RESET}"
+            echo -e "${YELLOW}Running Fedora GRUB repair...${RESET}"
             if [ "$BOOT_MODE" = "1" ]; then
-                sudo chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
                     grub2-mkconfig -o /boot/grub2/grub.cfg
                 "
             else
-                sudo chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub2-install --target=i386-pc /dev/sda &&
                     grub2-mkconfig -o /boot/grub2/grub.cfg
                 "
             fi
             ;;
         opensuse*|suse)
-            echo -e "${YELLOW}Reparando GRUB en openSUSE...${RESET}"
+            echo -e "${YELLOW}Running openSUSE GRUB repair...${RESET}"
             if [ "$BOOT_MODE" = "1" ]; then
-                sudo chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
                     grub2-mkconfig -o /boot/grub2/grub.cfg
                 "
             else
-                sudo chroot /mnt /bin/bash -c "
+                run_in_chroot "
                     grub2-install --target=i386-pc /dev/sda &&
                     grub2-mkconfig -o /boot/grub2/grub.cfg
                 "
             fi
             ;;
         nixos)
-            echo -e "${YELLOW}Reparando GRUB en NixOS...${RESET}"
+            echo -e "${YELLOW}Running NixOS GRUB repair...${RESET}"
             if [ "$BOOT_MODE" = "1" ]; then
                 sudo nixos-enter /mnt --command "
                     grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
@@ -580,14 +590,13 @@ grub_repair() {
             fi
             ;;
         *)
-            echo -e "${RED}Distribución no soportada: $DISTRO${RESET}"
+            echo -e "${RED}Unsupported distribution: $DISTRO${RESET}"
             return 1
             ;;
     esac
 
-    echo -e "${GREEN}Reparación de GRUB completada.${RESET}"
+    echo -e "${GREEN}GRUB repair completed successfully.${RESET}"
 }
-
 
 monitor_repair() {
   echo -e "${CYAN}${T[gpu_note]}${RESET}"
