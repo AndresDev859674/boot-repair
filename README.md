@@ -8,7 +8,7 @@
 
 `2.0 BETA ***possible errors or instabilities***`
 
-- A simple script that **automatically mounts partitions** and **reinstalls GRUB** to restore your system’s bootloader.  
+- A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
 
 > [!NOTE]
@@ -86,9 +86,8 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 
 4. **Follow the on-screen instructions**  
    The script will:
-   - Detect and mount your system partitions  
-   - Reinstall GRUB automatically  
-   - Restore your bootloader so you can boot normally again  
+   - Select options
+   - Make options and more
 
 ---
 
@@ -103,7 +102,16 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 - and the process ends
 ---
 
-## installing alias
-- Open **boot-repair** and select options and installed alias in Option *3*
-- and the process ends
+## Repair GNU/GRUB and working
+> [!WARNING]
+> This is not a definitive option, it is in process and being investigated. We know it is a bad connection with the motherboard. Be careful.
+> 
+- Open **boot-repair** and select
+ `1) Repair Grub`
+
+**Follow the on-screen instructions**  
+   The script will:
+   - Detect and mount your system partitions  
+   - Reinstall GRUB automatically  
+   - Restore your bootloader so you can boot normally again  
 ---
