@@ -6,7 +6,7 @@
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 ```
 
-`2.0 in Process ***possible errors or instabilities***`
+`0.1.1`
 
 - A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
@@ -92,7 +92,7 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 ---
 
 
-## Installing in AUR (For Arch Users)
+## Installing in AUR (For Arch Users + BUT OUTDATED)
 
 1. **Installing form AUR**
    Just install from AUR using yay!
