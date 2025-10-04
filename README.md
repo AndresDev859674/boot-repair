@@ -16,6 +16,8 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 > This is a new version of Auto-GRUB-Repair-Script with aliases and more
 >
 
+***This Script is most Perfect in arch***
+
 ---
 
 ## Features, ***more coming soon...***
