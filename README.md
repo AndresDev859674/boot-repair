@@ -5,8 +5,9 @@
 | `-' |' '-' '' '-' '  |  |         |  |   \   --.| '-' '\ '-'  ||  ||  |   
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 ```
+also known ***boot-repair-andres***
 
-`0.1.1`
+`0.1.2`
 
 - A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
@@ -92,7 +93,7 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 ---
 
 
-## Installing in AUR (For Arch Users + BUT OUTDATED)
+## Installing in AUR (For Arch Users)
 
 1. **Installing form AUR**
    Just install from AUR using yay!
@@ -110,6 +111,8 @@ Perfect for use from a **live environment** when your motherboard fails to detec
    The script will:
    - Select options
    - Make options and more
+
+For Arch Users, This is the easy Method for you!
 
 ---
 
@@ -129,6 +132,52 @@ Perfect for use from a **live environment** when your motherboard fails to detec
   
 ---
 
+## ⏱️ Older Versions
+If you want to go back to other versions (Some are stable) With this you can!
+
+### Older Versions
+
+| Version                 | ID           | Day          |
+|-------------------------|--------------|--------------|
+| 0.1.1 (not working)     | ./0.1.1.sh   | ❌           |
+| 0.1.0                   | ./.0.1.0.sh  | ❌           |
+
+### Installing
+Let's to Use Older Versions
+
+1. **Clone the repository**
+    ```bash
+    git clone https://github.com/AndresDev859674/boot-repair.git
+    ```
+
+2. **Navigate into the project folder**
+    ```bash
+    cd boot-repair
+    ```
+
+3. **Make Executable The Script**
+    ```bash
+    chmod +x *.sh
+    ```
+4. **Search a Version**
+    ```bash
+    ls
+    ```
+    Search a version, For example 0.1.0.sh
+
+5. **Run the script**
+    ```bash
+    sudo ./*version here*.sh
+    ```
+    Put your Password
+
+   **Follow the on-screen instructions**  
+   The script will:
+   - Select options
+   - Make options and more
+
+
+---
 ## Repair GNU/GRUB and working
 > [!WARNING]
 > This is not a definitive option, it is in process and being investigated. We know it is a bad connection with the motherboard. Be careful.
