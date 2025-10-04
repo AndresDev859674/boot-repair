@@ -12,13 +12,31 @@ also known ***boot-repair-andres***
 - A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Shell](https://img.shields.io/badge/Language-Shell-green)](https://opensource.org/licenses/MIT)
+![Bash Script](https://img.shields.io/badge/bash_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+
 > [!NOTE]
 > This is a new version of Auto-GRUB-Repair-Script with aliases and more
 >
 
-***This Script is most Perfect in arch***
+***This Script is most Perfect in Arch Linux***
 
 ---
+
+## Reliability and Project Scope
+
+The current version of this tool is designed to address specific boot issues, primarily focusing on robust and reliable solutions within those defined boundaries.
+
+Our core reliability currently lies in:
+
+* **GRUB Repair:** Providing effective and tested solutions for fixing GRUB bootloader issues across a wide range of supported distributions.
+* **System Diagnostics:** Offering utilities to diagnose screen/display issues and perform essential technical checks on the boot configuration.
+
+**Our Current Scope:** Our primary path involves interacting with **bootloaders** (currently GRUB-focused) and performing necessary **technical configurations** to restore system functionality. While our focus is narrow now, we aim for maximum dependability within that scope.
+
+***I'm very obsessed with bootloaders lol***
 
 ## Features, ***more coming soon...***
 - **Multi‑distro support** with automatic detection
@@ -29,41 +47,93 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 - **ASCII art + color‑coded output** for style
 - **Reboot option** at the end
 - **Repair Monitor**
-- **and Languages**
-  
+
 ## 🖥 Supported Distributions
 
-| Distribution  | UEFI Support | BIOS Support | Tested |
-|---------------|--------------|--------------|--------|
-| Arch Linux    | ✅           | ✅           | ✅     |
-| EndeavourOS   | ✅           | ✅           | ✅     |
-| CachyOS       | ✅           | ✅           | ✅     |
-| Debian        | ✅           | ✅           | ✅     |
-| Ubuntu        | ✅           | ✅           | ❌     |
-| Fedora        | ✅           | ✅           | ✅     |
-| openSUSE      | ✅           | ✅           | ❌     |
-| NixOS         | ✅           | ✅           | ❌     |
+### Base Distributions
+
+| Distribution | UEFI Support | BIOS Support | Status |
+|:-------------|:------------:|:------------:|:------:|
+| <details><summary>![Arch](https://img.shields.io/badge/Arch%20Linux-1793D1?logo=arch-linux&logoColor=fff&style=for-the-badge)</summary><br>**Notes:** Standard Arch installation methods work perfectly. Uses GRUB by default. <br> **Known Issues:** None confirmed.</details> | ✅ | ✅ | ✅ |
+| <details><summary>![Debian](https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white)</summary><br>**Notes:** Fully compatible with official GRUB package. Tested on Stable and Testing branches.</details> | ✅ | ✅ | ✅ |
+| <details><summary>![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)</summary><br>**Notes:** Full support. If issues arise, use the included `boot-repair` tool.</details> | ✅ | ✅ | ✅ |
+| ![Fedora](https://img.shields.io/badge/Fedora-294172?style=for-the-badge&logo=fedora&logoColor=white) | ✅ | ✅ | ✅ |
+| ![openSUSE](https://img.shields.io/badge/openSUSE-%2364B345?style=for-the-badge&logo=openSUSE&logoColor=white) | ✅ | ✅ | ❓ |
+| ![NixOS](https://img.shields.io/badge/NIXOS-5277C3.svg?style=for-the-badge&logo=NixOS&logoColor=white) | ✅ | ✅ | ❓ |
+| ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-0D597F?style=for-the-badge&logo=alpine-linux&logoColor=white) | ✅ | ✅ | ❓ (Upcoming) |
+| ![Gentoo](https://img.shields.io/badge/Gentoo-9B54FF?style=for-the-badge&logo=gentoo&logoColor=white) | ✅ | ✅ | ❌ |
+| ![FreeBSD](https://img.shields.io/badge/FreeBSD-CF2122?style=for-the-badge&logo=freebsd&logoColor=white) | ❓ | ❓ | ❓ (Upcoming) |
 
 ---
 
-## 📦 Prerequisites
-- A **live USB** or live environment of any supported distro  
-- **Git** installed (check with `git --version`)  
-  - If not installed, install it using your package manager:  
-    ```bash
-    # Debian/Ubuntu
-    sudo apt install git
-    
-    # Fedora
-    sudo dnf install git
-    
-    # Arch/EndeavourOS
-    sudo pacman -S git
-    ```
+### Derivative Distributions
 
+| Distribution | Base | UEFI Support | BIOS Support | Status |
+|:-------------|:------|:------------:|:------------:|:------:|
+| <details><summary>![Linux Mint](https://img.shields.io/badge/Linux%20Mint-87CF3E?style=for-the-badge&logo=Linux%20Mint&logoColor=white)</summary><br>**Notes:** Full support confirmed. Based on Ubuntu/Debian, using standard GRUB configuration.</details> | Ubuntu (Debian) | ✅ | ✅ | ✅ |
+| <details><summary>![MX Linux](https://img.shields.io/badge/-MX%20Linux-%23000000?style=for-the-badge&logo=MXlinux&logoColor=white)</summary><br>**Notes:** Fully supported due to Debian/antiX base. No extra steps expected.</details> | Debian/antiX | ✅ | ✅ | ✅ |
+| <details><summary>![Pop!\_OS](https://img.shields.io/badge/Pop!_OS-48B9C7?style=for-the-badge&logo=pop-os&logoColor=white)</summary><br>**Notes:** Uses Systemd-boot by default, not GRUB. Our fix applies to GRUB-only systems. Manual intervention may be needed to switch to GRUB.</details> | Ubuntu (Debian) | ✅ | ✅ | ✅ |
+| ![AnduinOS](https://img.shields.io/badge/AnduinOS-231F20?style=for-the-badge) | Debian/Ubuntu | ✅ | ✅ | ✅ |
+| <details><summary>![CachyOS](https://img.shields.io/badge/CachyOS-2396B2?style=for-the-badge&logo=arch-linux&logoColor=white)</summary><br>**Notes:** Arch-based, full GRUB support confirmed.</details> | Arch | ✅ | ✅ | ✅ |
+| ![EndeavourOS](https://img.shields.io/badge/EndeavourOS-2D1935?style=for-the-badge&logo=endeavouros&logoColor=white) | Arch | ✅ | ✅ | ✅ |
+| <details><summary>![Manjaro](https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=Manjaro&logoColor=white)</summary><br>**Notes:** Known to use a customized GRUB. Compatibility highly likely, but confirmation pending.</details> | Arch | ✅ | ✅ | ❓ |
+| ![Kali](https://img.shields.io/badge/Kali-268BEE?style=for-the-badge&logo=kalilinux&logoColor=white) | Debian | ✅ | ✅ | ❓ |
+| ![SparkyLinux](https://img.shields.io/badge/SparkyLinux-231F20?style=for-the-badge&logo=debian&logoColor=red) | Debian | ✅ | ✅ | ❓ |
+| ![Rocky Linux](https://img.shields.io/badge/-Rocky%20Linux-%2310B981?style=for-the-badge&logo=rockylinux&logoColor=white) | RHEL (Fedora) | ✅ | ✅ | ✅ |
+| ![Zorin OS](https://img.shields.io/badge/-Zorin%20OS-%2310AAEB?style=for-the-badge&logo=zorin&logoColor=white) | Ubuntu (Debian) | ✅ | ✅ | ✅ |
+| <details><summary>![Elementary OS](https://img.shields.io/badge/-elementary%20OS-black?style=for-the-badge&logo=elementary&logoColor=white)</summary><br>**Notes:** Uses Systemd-boot by default. Full support requires switching to GRUB.</details> | Ubuntu (Debian) | ✅ | ✅ | ❓ |
+| ![Raspberry Pi OS](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi) | Debian | ✅ | ✅ | ❓ |
+| ![FydeOS](https://img.shields.io/badge/FydeOS-2D3D58?style=for-the-badge) | ChromeOS/Gentoo | ❓ | ❓ | ❌ |
+| ![ChromeOS](https://img.shields.io/badge/Chrome_OS-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white) | Gentoo | ❓ | ❓ | ❌ |
+
+---
+
+### Legend
+
+| Icon | Meaning |
+|:----:|:-------------------|
+| **✅** | **Confirmed Working:** Tested and fully supported. |
+| **❓** | **Should Work / Pending Confirmation:** Expected to work (often based on its parent distribution), but testing is pending or needs confirmation. |
+| **❌** | **Not Supported:** Confirmed not to work or not supported by the project. |
+---
+
+# 🎯 Project Goals & Roadmap
+
+Our primary objective is to expand compatibility beyond current limits. We are actively working on the following major goals:
+
+* **Operating System Expansion:** Implement full support for **FreeBSD** and **Alpine Linux**.
+* **Bootloader Diversity:** Integrate support for alternative bootloaders including **Systemd-boot**, **rEFInd**, and **Limine**.
+  
+Linux is a long world to explore, we are looking for what we can to fix common problems.
+
+---
+## 📦 Prerequisites
+
+To ensure a smooth process, you must start from a live environment and have **Git** installed.
+
+* A **Live USB** or live environment of any [Supported Distribution](#-supported-distributions).
+* **Internet access** is required for cloning the repository and potentially installing necessary packages.
+* **Git** must be installed. You can check the installation with `git --version`.
+
+### Installing Git
+
+If Git is not installed on your live environment, use the corresponding command for your base distribution:
+
+```bash
+# Debian, Ubuntu, Mint, Kali, Pop!_OS, etc.
+sudo apt update && sudo apt install git
+
+# Fedora, Rocky Linux, etc.
+sudo dnf install git
+
+# Arch, Manjaro, CachyOS, EndeavourOS, etc.
+sudo pacman -S git
+```
 ---
 
 ## Installing form GIT (***For all Distros! + more time...***)
+installing From GIT is more Accessible!
+
 
 1. **Clone the repository**
     ```bash
@@ -179,16 +249,18 @@ Let's to Use Older Versions
 
 
 ---
-## Repair GNU/GRUB and working
+## 🛠 Repair GNU/GRUB and working
+
 > [!WARNING]
 > This is not a definitive option, it is in process and being investigated. We know it is a bad connection with the motherboard. Be careful.
-> 
+>
 - Open **boot-repair** and select
- `1) Repair Grub`
+  `1) Repair Grub`
 
-**Follow the on-screen instructions**  
-   The script will:
-   - Detect and mount your system partitions  
-   - Reinstall GRUB automatically  
-   - Restore your bootloader so you can boot normally again  
+**Follow the on-screen instructions**
+   The script will:
+   - Detect and mount your system partitions
+   - Reinstall GRUB automatically
+   - Restore your bootloader so you can boot normally again
+
 ---
