@@ -156,7 +156,11 @@ installing From GIT is more Accessible!
     ```
     Put your Password
 
-4. **Follow the on-screen instructions**  
+---
+
+![alt text](https://raw.githubusercontent.com/AndresDev859674/boot-repair/refs/heads/main/Images/boot-repair-main-menu.png)
+
+**Follow the on-screen instructions**  
    The script will:
    - Select options
    - Make options and more
@@ -242,11 +246,14 @@ Let's to Use Older Versions
     ```
     Put your Password
 
-   **Follow the on-screen instructions**  
+---
+
+![alt text](https://raw.githubusercontent.com/AndresDev859674/boot-repair/refs/heads/main/Images/boot-repair-main-menu.png)
+
+**Follow the on-screen instructions**  
    The script will:
    - Select options
    - Make options and more
-
 
 ---
 ## 🛠 Repair GNU/GRUB and working
@@ -257,10 +264,9 @@ Let's to Use Older Versions
 - Open **boot-repair** and select
   `1) Repair Grub`
 
-**Follow the on-screen instructions**
-   The script will:
-   - Detect and mount your system partitions
-   - Reinstall GRUB automatically
-   - Restore your bootloader so you can boot normally again
+**Follow the on-screen instructions**  
+   The script will:
+   - Select options
+   - Make options and more
 
 ---
