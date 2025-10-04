@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 #========================================================
-#  BootRepair v0.1.1
+#  BootRepair v0.1.2
 #  License: MIT
 #  Description: Swiss-army live rescue tool: GRUB repair, display reset,
 #               initramfs, kernel, system update, boot freedom, diagnostics.
 #  Supports: Arch/EndeavourOS/CachyOS, Debian/Ubuntu/Mint/Pop, Fedora,
 #            openSUSE, NixOS (best-effort)
 #========================================================
-
-set -euo pipefail
 
 START_TIME=$(date +%s)
 
@@ -37,14 +35,14 @@ if [[ "$LANG_CODE" == "en" ]]; then
   T[secure_unknown]="Unknown"
   T[menu_title]="Main menu"
   T[m1]="1) Repair GRUB"
-  T[m2]="2) Reset monitor configs (Wayland/Hyprland/Xorg)"
-  T[m3]="3) Regenerate initramfs"
-  T[m4]="4) Reinstall kernel"
-  T[m5]="5) Update operating system"
-  T[m6]="6) Boot freedom (timeout, default, EFI, os-prober)"
-  T[m7]="7) Quick diagnostics"
-  T[m8]="8) Settings (language, expert mode, install alias)"
-  T[m9]="10) Exit"
+  T[m2]="3) Reset monitor configs (Wayland/Hyprland/Xorg)"
+  T[m3]="4) Regenerate initramfs"
+  T[m4]="5) Reinstall kernel"
+  T[m5]="6) Update operating system"
+  T[m6]="7) Boot freedom (timeout, default, EFI, os-prober)"
+  T[m7]="8) Quick diagnostics"
+  T[m8]="9) Settings (language, expert mode, install alias)"
+  T[m9]="11) Exit"
   T[enter_choice]="Choose an option"
   T[press_enter]="Press Enter to continue..."
   T[need_root]="This script requires administrator privileges (sudo)."
@@ -123,7 +121,7 @@ ascii_banner() {
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} v0.1.1 Beta ===${RESET}"
+  echo -e "${YELLOW}=== ${T[title]} v0.1.2 ===${RESET}"
 }
 
 pause() { read -r -p "${T[press_enter]}" _ </dev/tty; }
@@ -149,63 +147,148 @@ secure_boot_status() {
   fi
 }
 
+echo ""
+
+# T[] is assumed to be defined by the main script, but for a standalone script:
+declare -A T
+
+T[gather]="DETAILED SYSTEM INFORMATION 🔎"
+T[detected_arch]="Architecture"
+T[detected_distro]="Distribution"
+T[detected_mode]="Boot Mode"
+T[secureboot]="Secure Boot"
+
+# Mock function for secure_boot_status (replace with your actual implementation if needed)
+secure_boot_status() {
+    if command -v mokutil &>/dev/null; then
+        mokutil --sb-state 2>/dev/null | grep "SecureBoot" | awk '{print $NF}'
+    elif [[ -f /sys/firmware/efi/efivars/SecureBoot-*-*-*-*-* ]]; then
+        echo "Enabled"
+    else
+        echo "Disabled/Not Supported"
+    fi
+}
+
 info_header() {
-  echo -e "${CYAN}${T[gather]}${RESET}"
-  echo "Hostname: $(hostname)"
-  echo "Kernel: $(uname -r)"
-  ARCH=$(uname -m)
-  echo "${T[detected_arch]}: $ARCH"
+    echo -e "${CYAN}${T[gather]}${RESET}"
+    echo "------------------------------------------------"
 
-  # Motherboard
-  if command -v dmidecode &>/dev/null; then
-    echo "Motherboard: $(dmidecode -s baseboard-manufacturer 2>/dev/null) $(dmidecode -s baseboard-product-name 2>/dev/null)"
-  fi
+    ## 1. General & OS Information
+    echo -e "${YELLOW}>> General & OS Info${RESET}"
+    echo "  Hostname:           $(hostname)"
+    echo "  Current User:       $(whoami)"
+    echo "  Uptime:             $(uptime -p | cut -d' ' -f2-)"
+    echo "  Date/Time:          $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "  Current Shell:      $SHELL"
+    echo "  Kernel:             $(uname -r)"
 
-  # Distro
-  DISTRO="unknown"
-  if [[ -f /etc/os-release ]]; then . /etc/os-release; DISTRO="$PRETTY_NAME"; fi
-  echo -e "${GREEN}${T[detected_distro]}:${RESET} $DISTRO"
+    # OS Distribution Detail
+    DISTRO_NAME="Unknown"
+    if [[ -f /etc/os-release ]]; then
+        . /etc/os-release
+        DISTRO_NAME="$PRETTY_NAME"
+    elif command -v lsb_release &>/dev/null; then
+        DISTRO_NAME=$(lsb_release -ds)
+    fi
+    echo -e "  ${T[detected_distro]}:    ${GREEN}$DISTRO_NAME${RESET}"
 
-  # Boot mode
-  if [[ -d /sys/firmware/efi/efivars ]]; then BOOT_MODE="UEFI"; else BOOT_MODE="BIOS"; fi
-  echo -e "${GREEN}${T[detected_mode]}:${RESET} $BOOT_MODE"
-  echo -e "${GREEN}${T[secureboot]}:${RESET} $(secure_boot_status)"
+    # Architecture and Boot Mode
+    ARCH=$(uname -m)
+    echo "  ${T[detected_arch]}:         $ARCH"
+    if [[ -d /sys/firmware/efi/efivars ]]; then BOOT_MODE="UEFI"; else BOOT_MODE="BIOS"; fi
+    echo -e "  ${T[detected_mode]}:    ${GREEN}$BOOT_MODE${RESET}"
+    echo -e "  ${T[secureboot]}:       ${GREEN}$(secure_boot_status)${RESET}"
+    echo "------------------------------------------------"
 
-  echo "-----------------------------------"
+    ## 2. Processor (CPU) Information
+echo -e "${YELLOW}>> Processor (CPU) Info${RESET}"
+if command -v lscpu &>/dev/null; then
+    # --- MÉTODO ROBUSTO: LECTURA DIRECTA DE LÍNEAS CON 'grep' ---
 
-  # CPU
-  CPU=$(lscpu | grep "Model name" | sed 's/Model name:\s*//')
-  echo "CPU: $CPU"
+# --- MÉTODO ROBUSTO: LECTURA DIRECTA DE /proc/cpuinfo y lscpu ---
 
-  # GPU (si hay)
-  if command -v lspci &>/dev/null; then
-    GPU=$(lspci | grep -i 'vga' | sed 's/.*: //')
-    echo "GPU: $GPU"
-  fi
+    # 1. Modelo de CPU (el más seguro, lee cpuinfo)
+    CPU_MODEL=$(grep "model name" /proc/cpuinfo | head -1 | awk -F': ' '{print $2}' | xargs)
 
-  # RAM
-  MEM_TOTAL=$(free -h | awk '/Mem:/ {print $2}')
-  MEM_USED=$(free -h | awk '/Mem:/ {print $3}')
-  echo "RAM: $MEM_USED / $MEM_TOTAL"
+    # 2. Otros datos (usamos lscpu por su formato conciso)
+    CPU_CORES=$(lscpu | grep "^CPU(s):" | awk '{print $2}' | xargs)
+    CPU_THREADS_PER_CORE=$(lscpu | grep "Thread(s) per core:" | awk '{print $4}' | xargs)
+    CPU_SOCKETS=$(lscpu | grep "Socket(s):" | awk '{print $2}' | xargs)
 
-  # Disco raíz
-  DISK_USED=$(df -h / | awk 'NR==2 {print $3}')
-  DISK_TOTAL=$(df -h / | awk 'NR==2 {print $2}')
-  echo "Disk (/): $DISK_USED / $DISK_TOTAL"
+    echo "  Model:              ${CPU_MODEL:-N/A}"
+    echo "  Cores (Total):      ${CPU_CORES:-N/A}"
+    echo "  Threads/Core:       ${CPU_THREADS_PER_CORE:-N/A}"
+    echo "  Sockets:            ${CPU_SOCKETS:-N/A}"
+else
+    echo "  lscpu command not found."
+fi
+echo "------------------------------------------------"
 
-  # Uptime
-  echo "Uptime: $(uptime -p)"
 
-  # Shell
-  echo "Shell: $SHELL"
+    ## 3. Memory (RAM) Information
+    echo -e "${YELLOW}>> Memory (RAM) Info${RESET}"
+    if command -v free &>/dev/null; then
+        MEM_TOTAL=$(free -h | grep "Mem:" | awk '{print $2}')
+        MEM_USED=$(free -h | grep "Mem:" | awk '{print $3}')
+        MEM_FREE=$(free -h | grep "Mem:" | awk '{print $4}')
+        MEM_USED_PERCENT=$(free | awk '/Mem:/ {printf "%.2f", $3/$2*100}')
 
-  # Terminal
-  echo "Terminal: $TERM"
+        echo "  Total RAM:          $MEM_TOTAL"
+        echo "  Used RAM:           $MEM_USED (${RED}$MEM_USED_PERCENT%${RESET})"
+        echo "  Free RAM:           $MEM_FREE"
 
-  # Usuarios conectados
-  echo "Logged users: $(who | wc -l)"
+        # Optional: Swap info
+        SWAP_TOTAL=$(free -h | grep "Swap:" | awk '{print $2}')
+        SWAP_USED=$(free -h | grep "Swap:" | awk '{print $3}')
+        echo "  Total SWAP:         $SWAP_TOTAL (Used: $SWAP_USED)"
+    else
+        echo "  free command not found."
+    fi
+    echo "------------------------------------------------"
 
-  echo "-----------------------------------"
+    # 4. Disk Usage
+    echo -e "${YELLOW}>> Disk Usage${RESET}"
+    if command -v df &>/dev/null; then
+        # ... (código de df -h)
+
+# Mostrar el uso de las particiones principales (raíz y /home si existe)
+    echo "  Root Partition Usage:"
+    df -h / | grep -v Filesystem | awk '{printf "    Size: %s | Used: %s | Avail: %s | Used %%: %s\n", $2, $3, $4, $5}'
+
+    # Mostrar particiones adicionales relevantes (como /home, /var, etc.)
+    echo "  Other Mounted Filesystems:"
+    df -h -x tmpfs -x devtmpfs | grep -E '^/dev' | grep -v ' / ' | column -t
+    fi
+    echo "------------------------------------------------"
+
+    ## 5. Network Information
+    echo -e "${YELLOW}>> Network Info${RESET}"
+    if command -v ip &>/dev/null; then
+        # Get the primary interface (excluding loopback)
+        MAIN_IFACE=$(ip -o link show | awk -F': ' '$2 != "lo" {print $2; exit}')
+
+        if [ -n "$MAIN_IFACE" ]; then
+            IP_ADDR=$(ip a show dev "$MAIN_IFACE" | grep 'inet ' | awk '{print $2}' | head -n 1)
+            MAC_ADDR=$(ip link show dev "$MAIN_IFACE" | grep 'link/ether' | awk '{print $2}')
+
+            echo "  Primary Interface:  $MAIN_IFACE"
+            echo "  IP Address:         $IP_ADDR"
+            echo "  MAC Address:        $MAC_ADDR"
+
+            # Show active listening ports
+            echo "  Listening Ports (TCP/UDP):"
+            if command -v ss &>/dev/null; then
+                ss -tuln | head -n 6 # Show a sample of 5 listening ports
+            else
+                echo "    (Use 'ss -tuln' for full list)"
+            fi
+        else
+            echo "  No active network interfaces detected."
+        fi
+    else
+        echo "  ip command not found."
+    fi
+    echo "------------------------------------------------"
 }
 
 
@@ -260,7 +343,390 @@ distro_in_chroot() { local id="unknown"; [[ -f /mnt/etc/os-release ]] && . /mnt/
 #-----------------------
 # Modules
 #-----------------------
+# --- Cleanup Function ---
+# Ensures all partitions are safely unmounted upon script completion or in case of an error.
+cleanup() {
+    # Prevent the exit trap from running multiple times
+    trap - EXIT
+    echo -e "\n${CYAN}>>> Cleaning up and unmounting partitions...${RESET}"
+    # Recursively unmount everything under /mnt. It's safer and more effective.
+    if mountpoint -q /mnt; then
+        echo "  Unmounting /mnt recursively..."
+        sudo umount -R /mnt &>/dev/null
+    fi
+    echo -e "${GREEN}>>> Cleanup complete.${RESET}"
+}
+
+# --- Help Function ---
+# Displays how to use the script.
+show_usage() {
+    echo -e "${BOLD}Usage:${RESET} sudo bash $0"
+    echo -e "This script must be run with superuser (root) privileges."
+    exit 1
+}
+
+# --- Main Repair Function ---
 grub_repair() {
+    # Set a trap to call cleanup() on script exit, interruption, or termination.
+    trap cleanup EXIT INT TERM
+
+    # --- 1. Initial Checks ---
+    echo -e "${BLUE}${BOLD}--- GRUB Advanced Repair Tool ---${RESET}"
+
+    # Check if running as root
+    if [[ "$EUID" -ne 0 ]]; then
+        echo -e "${RED}Error: This script requires superuser privileges.${RESET}"
+        show_usage
+    fi
+
+    # Check for necessary dependencies
+    for cmd in lsblk mount umount chroot grub-install; do
+        if ! command -v "$cmd" &>/dev/null; then
+            echo -e "${RED}Error: Required command '${BOLD}$cmd${RESET}${RED}' not found. Please install it.${RESET}"
+            exit 1
+        fi
+    done
+    echo -e "${GREEN}All necessary dependencies are present.${RESET}"
+
+    # --- 2. System Detection ---
+    echo -e "\n${CYAN}>>> Detecting system configuration...${RESET}"
+
+    # Detect architecture
+    local arch
+    arch=$(uname -m)
+    local grub_target_arch=""
+    case "$arch" in
+        "x86_64")   grub_target_arch="x86_64" ;;
+        "i386"|"i686") grub_target_arch="i386" ;;
+        "aarch64")  grub_target_arch="arm64" ;;
+        "armv7l"|"armv6l") grub_target_arch="arm" ;;
+        *)
+            echo -e "${RED}Error: Unsupported architecture ('${BOLD}$arch${RESET}${RED}').${RESET}"
+            exit 1
+            ;;
+    esac
+    echo -e "  ${GREEN}Architecture detected:${RESET} $arch"
+
+    # Detect boot mode (UEFI or BIOS)
+    local boot_mode=""
+    if [ -d /sys/firmware/efi/efivars ]; then
+        boot_mode="UEFI"
+    else
+        boot_mode="BIOS"
+    fi
+    echo -e "  ${GREEN}Boot mode detected:${RESET} $boot_mode"
+
+    # --- 3. Partition Selection ---
+    echo -e "\n${CYAN}>>> Partition Selection ---${RESET}"
+    echo "1) Automatic detection"
+    echo "2) Manual selection"
+    local selection_mode
+    read -rp "Choose a mode [1/2]: " selection_mode
+
+    local root_part=""
+    local efi_part=""
+
+    if [[ "$selection_mode" == "2" ]]; then
+        # --- Manual Mode ---
+        echo -e "\n${YELLOW}Listing available disks and partitions:${RESET}"
+        lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT
+        echo -e "${YELLOW}Please identify your partitions (e.g., /dev/sda2).${RESET}"
+
+        read -rp "Enter your root (/) partition: " root_part
+        if [[ "$boot_mode" == "UEFI" ]]; then
+            read -rp "Enter your EFI (ESP) partition: " efi_part
+        fi
+    else
+        # --- Automatic Mode ---
+        echo -e "\n${YELLOW}Searching for partitions automatically...${RESET}"
+
+# Detect EFI partition (ESP)
+        if [[ "$boot_mode" == "UEFI" ]]; then
+            # Searches for partitions with the 'EFI System Partition' PARTTYPE GUID
+            local esp_candidates
+            esp_candidates=($(lsblk -pno NAME,PARTTYPE | awk '$2=="c12a7328-f81f-11d2-ba4b-00a0c93ec93b" {print $1}'))
+            if [ ${#esp_candidates[@]} -eq 0 ]; then
+                echo -e "${RED}Error: No EFI System Partition (ESP) found. Try manual mode.${RESET}"
+                exit 1
+            elif [ ${#esp_candidates[@]} -eq 1 ]; then
+                efi_part=${esp_candidates[0]}
+                echo -e "  ${GREEN}EFI partition found:${RESET} $efi_part"
+            else
+                echo -e "${YELLOW}Multiple EFI partitions found. Please choose one:${RESET}"
+                select opt in "${esp_candidates[@]}"; do
+                    if [[ -n "$opt" ]]; then
+                        efi_part=$opt
+                        break
+                    else
+                        echo "Invalid selection."
+                    fi
+                done
+            fi
+        fi
+
+        # List Linux partitions for the user to choose the root
+        echo -e "${YELLOW}Please select your root (/) partition from the list:${RESET}"
+        # Show partitions with common Linux filesystems
+        local root_candidates
+        root_candidates=($(lsblk -pno NAME,FSTYPE | awk '$2 ~ /ext4|btrfs|xfs|f2fs/ {print $1}'))
+        if [ ${#root_candidates[@]} -eq 0 ]; then
+            echo -e "${RED}Error: No partitions with common Linux filesystems found. Try manual mode.${RESET}"
+            exit 1
+        fi
+
+        select opt in "${root_candidates[@]}"; do
+            if [[ -n "$opt" ]]; then
+                root_part=$opt
+                break
+            else
+                echo "Invalid selection."
+            fi
+        done
+    fi
+
+    # Validate that selected partitions exist as block devices
+    if ! [ -b "$root_part" ] || ([[ "$boot_mode" == "UEFI" ]] && ! [ -b "$efi_part" ]); then
+        echo -e "${RED}Error: One or more selected partitions are not valid block devices.${RESET}"
+        exit 1
+    fi
+
+    # --- 4. Confirmation and Mounting ---
+    echo -e "\n${CYAN}>>> Operation Summary ---${RESET}"
+    echo -e "  - ${BOLD}Root Partition:${RESET} $root_part"
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        echo -e "  - ${BOLD}EFI Partition:${RESET}  $efi_part"
+    fi
+    echo -e "  - ${BOLD}Boot Mode:${RESET}     $boot_mode"
+    echo -e "\n${YELLOW}WARNING:${RESET} This will modify your system's bootloader files."
+    read -rp "  Do you wish to continue? [y/N]: " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Operation cancelled by user.${RESET}"
+        exit 0
+    fi
+
+    echo -e "\n${CYAN}>>> Mounting the file system...${RESET}"
+    echo "  Mounting $root_part on /mnt..."
+    sudo mount "$root_part" /mnt
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to mount the root partition.${RESET}"; exit 1;
+    else
+        echo -e "  ${GREEN}Root partition mounted successfully.${RESET}"
+    fi
+
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        # Ensure the mount point for EFI exists
+        echo "  Creating mountpoint /mnt/boot/efi if it doesn't exist..."
+        sudo mkdir -p /mnt/boot/efi
+        echo "  Mounting $efi_part on /mnt/boot/efi..."
+        sudo mount "$efi_part" /mnt/boot/efi
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}Error: Failed to mount the EFI partition.${RESET}"; exit 1;
+        else
+            echo -e "  ${GREEN}EFI partition mounted successfully.${RESET}"
+        fi
+    fi
+
+    # --- 5. Preparing the Chroot Environment ---
+    echo -e "\n${CYAN}>>> Preparing the chroot environment...${RESET}"
+    # Mount virtual filesystems necessary for chroot to function correctly
+    echo "  Binding /dev, /proc, and /sys..."
+    for fs in dev proc sys; do
+        sudo mount --make-rslave --bind /$fs /mnt/$fs
+    done
+    echo "  Copying DNS info to chroot for internet connectivity..."
+    sudo cp /etc/resolv.conf /mnt/etc/resolv.conf
+    echo -e "  ${GREEN}Chroot environment is ready.${RESET}"
+
+    # Detect distribution from within the chroot
+    local distro=""
+    if [ -f /mnt/etc/os-release ]; then
+        distro=$(awk -F= '$1=="ID" { print $2 }' /mnt/etc/os-release | tr -d '"')
+        echo -e "  ${GREEN}Distribution detected in ${root_part}:${RESET} ${distro^}"
+    else
+        echo -e "${RED}Error: Could not detect distribution. /etc/os-release not found.${RESET}"
+        exit 1
+    fi
+
+    # --- 6. Executing the Repair ---
+    echo -e "\n${CYAN}>>> Executing GRUB Repair...${RESET}"
+
+    local grub_install_cmd=""
+    local grub_config_cmd=""
+    local pkg_manager_cmd=""
+    local grub_efi_dir="/boot/efi" # Standard in most distros
+
+    # Distribution-specific settings
+    case "$distro" in
+        arch|endeavouros|manjaro)
+            grub_install_cmd="grub-install"
+            grub_config_cmd="grub-mkconfig -o /boot/grub/grub.cfg"
+            pkg_manager_cmd="pacman -S --noconfirm grub efibootmgr" # Reinstall just in case
+            ;;
+        debian|ubuntu|linuxmint)
+            grub_install_cmd="grub-install"
+            grub_config_cmd="update-grub"
+            pkg_manager_cmd="apt-get update && apt-get install --reinstall -y grub-common grub-efi-${grub_target_arch}-signed shim-signed"
+            ;;
+        fedora|centos|rhel)
+            grub_install_cmd="grub2-install"
+            grub_config_cmd="grub2-mkconfig -o /boot/grub2/grub.cfg"
+            pkg_manager_cmd="dnf reinstall -y grub2-efi-${grub_target_arch} shim-${grub_target_arch}"
+            ;;
+        opensuse*|sles)
+            grub_install_cmd="grub2-install"
+            grub_config_cmd="grub2-mkconfig -o /boot/grub2/grub.cfg"
+            pkg_manager_cmd="zypper install --force grub2-x86_64-efi shim"
+            ;;
+        *)
+            echo -e "${RED}Error: Distribution '${distro}' is not supported by this script.${RESET}"
+            exit 1
+            ;;
+    esac
+
+    local full_command=""
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        local secure_boot_fix=""
+        read -rp "  Attempt to reinstall packages for Secure Boot? (Recommended) [y/N]: " fix_sb
+        if [[ "$fix_sb" =~ ^[Yy]$ ]]; then
+            secure_boot_fix="$pkg_manager_cmd && "
+        fi
+
+        # The bootloader-id is the name that will appear in the BIOS/UEFI boot menu
+        full_command="${secure_boot_fix}${grub_install_cmd} --target=${grub_target_arch}-efi --efi-directory=${grub_efi_dir} --bootloader-id=GRUB --recheck && ${grub_config_cmd}"
+
+    else # BIOS Mode
+        local target_disk=""
+        echo -e "${YELLOW}Please choose the disk to install GRUB onto (usually the main disk, not a partition):${RESET}"
+        local disk_candidates
+        disk_candidates=($(lsblk -dno NAME | awk '{print "/dev/"$1}'))
+        select opt in "${disk_candidates[@]}"; do
+            if [[ -n "$opt" ]]; then
+                target_disk=$opt
+                break
+            else
+                echo "Invalid selection."
+            fi
+        done
+        full_command="${grub_install_cmd} --target=${grub_target_arch}-pc --recheck ${target_disk} && ${grub_config_cmd}"
+    fi
+
+    # Execute the final command inside the chroot
+    echo -e "\n${YELLOW}The following commands will be executed inside the chroot:${RESET}"
+    echo -e "${BOLD}$full_command${RESET}"
+    echo -e "${YELLOW}Starting repair process...${RESET}"
+
+    if sudo chroot /mnt /bin/bash -c "$full_command"; then
+        echo -e "\n${GREEN}${BOLD}Success! The GRUB repair process appears to have completed successfully.${RESET}"
+        echo -e "You may now reboot your system."
+    else
+        echo -e "\n${RED}${BOLD}Error: The GRUB repair failed inside the chroot environment.${RESET}"
+        echo -e "Please review the error messages above to diagnose the issue."
+        exit 1
+    fi
+}
+
+grub_repair_experimental() {
+    RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
+    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+    LOGFILE="/var/log/grub_repair_${TIMESTAMP}.log"
+
+    echo -e "${CYAN}=== GRUB Repair Experimental ===${RESET}"
+    [[ $EUID -ne 0 ]] && { echo -e "${RED}Debes ser root.${RESET}"; return 1; }
+
+    # Detect distro
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        DISTRO=$ID
+    else
+        echo -e "${RED}No se pudo detectar la distribución.${RESET}"
+        return 1
+    fi
+    echo -e "${GREEN}Distro detectada:${RESET} $DISTRO"
+
+    # Detect boot mode
+    if [ -d /sys/firmware/efi ]; then
+        BOOT_MODE="UEFI"
+    else
+        BOOT_MODE="BIOS"
+    fi
+    echo -e "${GREEN}Modo detectado:${RESET} $BOOT_MODE"
+
+    # Ask partitions
+    read -rp "Partición raíz (ej: /dev/sda2): " ROOT_PART
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+        read -rp "Partición EFI (ej: /dev/sda1): " EFI_PART
+    fi
+
+    # Mount
+    mount "$ROOT_PART" /mnt || return 1
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+        mkdir -p /mnt/boot/efi
+        mount "$EFI_PART" /mnt/boot/efi || return 1
+    fi
+
+    # Backup automático
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+        BACKUP_DIR="/mnt/boot/efi/EFI/Backup_${TIMESTAMP}"
+        mkdir -p "$BACKUP_DIR"
+        cp -a /mnt/boot/efi/EFI/* "$BACKUP_DIR"/ 2>/dev/null || true
+        efibootmgr -v > "$LOGFILE.nvram" 2>/dev/null || true
+        echo -e "${YELLOW}Backup del ESP en:${RESET} $BACKUP_DIR"
+        echo -e "${YELLOW}Entradas NVRAM guardadas en:${RESET} $LOGFILE.nvram"
+    fi
+
+    # Helper chroot
+    run_in_chroot() {
+        if command -v arch-chroot >/dev/null; then
+            arch-chroot /mnt /bin/bash -c "$1"
+        else
+            mount --bind /dev /mnt/dev
+            mount --bind /proc /mnt/proc
+            mount --bind /sys /mnt/sys
+            chroot /mnt /bin/bash -c "$1"
+        fi
+    }
+
+    # Install GRUB
+    case "$DISTRO" in
+        arch|endeavouros|cachyos)
+            if [ "$BOOT_MODE" = "UEFI" ]; then
+                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
+                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
+                run_in_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+            else
+                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && grub-mkconfig -o /boot/grub/grub.cfg"
+            fi
+            ;;
+        debian|ubuntu)
+            if [ "$BOOT_MODE" = "UEFI" ]; then
+                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
+                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
+                run_in_chroot "update-grub"
+            else
+                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && update-grub"
+            fi
+            ;;
+        fedora|opensuse*|suse)
+            if [ "$BOOT_MODE" = "UEFI" ]; then
+                run_in_chroot "grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
+                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
+                run_in_chroot "grub2-mkconfig -o /boot/grub2/grub.cfg"
+            else
+                run_in_chroot "grub2-install --target=i386-pc /dev/sda --recheck && grub2-mkconfig -o /boot/grub2/grub.cfg"
+            fi
+            ;;
+        nixos)
+            run_in_chroot "nixos-rebuild boot"
+            ;;
+        *)
+            echo -e "${RED}Distro no soportada automáticamente.${RESET}"
+            ;;
+    esac
+
+    echo -e "${GREEN}Reparación de GRUB completada.${RESET}"
+}
+
+grub_repair-classic() {
     # Colors
     RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
 
@@ -395,108 +861,6 @@ grub_repair() {
 
     echo -e "${GREEN}GRUB repair completed successfully.${RESET}"
 }
-
-grub_repair_experimental() {
-    RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
-    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-    LOGFILE="/var/log/grub_repair_${TIMESTAMP}.log"
-
-    echo -e "${CYAN}=== GRUB Repair Experimental ===${RESET}"
-    [[ $EUID -ne 0 ]] && { echo -e "${RED}Debes ser root.${RESET}"; return 1; }
-
-    # Detect distro
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        DISTRO=$ID
-    else
-        echo -e "${RED}No se pudo detectar la distribución.${RESET}"
-        return 1
-    fi
-    echo -e "${GREEN}Distro detectada:${RESET} $DISTRO"
-
-    # Detect boot mode
-    if [ -d /sys/firmware/efi ]; then
-        BOOT_MODE="UEFI"
-    else
-        BOOT_MODE="BIOS"
-    fi
-    echo -e "${GREEN}Modo detectado:${RESET} $BOOT_MODE"
-
-    # Ask partitions
-    read -rp "Partición raíz (ej: /dev/sda2): " ROOT_PART
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        read -rp "Partición EFI (ej: /dev/sda1): " EFI_PART
-    fi
-
-    # Mount
-    mount "$ROOT_PART" /mnt || return 1
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        mkdir -p /mnt/boot/efi
-        mount "$EFI_PART" /mnt/boot/efi || return 1
-    fi
-
-    # Backup automático
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        BACKUP_DIR="/mnt/boot/efi/EFI/Backup_${TIMESTAMP}"
-        mkdir -p "$BACKUP_DIR"
-        cp -a /mnt/boot/efi/EFI/* "$BACKUP_DIR"/ 2>/dev/null || true
-        efibootmgr -v > "$LOGFILE.nvram" 2>/dev/null || true
-        echo -e "${YELLOW}Backup del ESP en:${RESET} $BACKUP_DIR"
-        echo -e "${YELLOW}Entradas NVRAM guardadas en:${RESET} $LOGFILE.nvram"
-    fi
-
-    # Helper chroot
-    run_in_chroot() {
-        if command -v arch-chroot >/dev/null; then
-            arch-chroot /mnt /bin/bash -c "$1"
-        else
-            mount --bind /dev /mnt/dev
-            mount --bind /proc /mnt/proc
-            mount --bind /sys /mnt/sys
-            chroot /mnt /bin/bash -c "$1"
-        fi
-    }
-
-    # Install GRUB
-    case "$DISTRO" in
-        arch|endeavouros|cachyos)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
-            else
-                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && grub-mkconfig -o /boot/grub/grub.cfg"
-            fi
-            ;;
-        debian|ubuntu)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "update-grub"
-            else
-                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && update-grub"
-            fi
-            ;;
-        fedora|opensuse*|suse)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "grub2-mkconfig -o /boot/grub2/grub.cfg"
-            else
-                run_in_chroot "grub2-install --target=i386-pc /dev/sda --recheck && grub2-mkconfig -o /boot/grub2/grub.cfg"
-            fi
-            ;;
-        nixos)
-            run_in_chroot "nixos-rebuild boot"
-            ;;
-        *)
-            echo -e "${RED}Distro no soportada automáticamente.${RESET}"
-            ;;
-    esac
-
-    echo -e "${GREEN}Reparación de GRUB completada.${RESET}"
-}
-
 
 monitor_repair() {
   echo -e "${CYAN}${T[gpu_note]}${RESET}"
@@ -842,9 +1206,10 @@ main_menu() {
     info_header
     echo -e "${YELLOW}=== ${T[menu_title]} ===${RESET}"
     echo ""
-    echo "The LANG is been removed! Learn english!"
+    echo "TIP : You can use boot-repair on your PC and then go to the Live user and mount your partitions and chroot and use boot-repair as a repair without installing inside the Live User"
     echo ""
     echo "${T[m1]}"
+    echo "2) Repair GRUB Classic (most Stable + Recommended)"
     echo "${T[m2]}"
     echo "${T[m3]}"
     echo "${T[m4]}"
@@ -852,20 +1217,21 @@ main_menu() {
     echo "${T[m6]}"
     echo "${T[m7]}"
     echo "${T[m8]}"
-    echo "9) Aliases (Only for Git)"
+    echo "10) Aliases (For GIT users Please install it in Settings)"
     echo "${T[m9]}"
     local choice; read -r -p "${T[enter_choice]} >> " choice </dev/tty
     case "$choice" in
       1) grub_repair ;;
-      2) monitor_repair ;;
-      3) regen_initramfs ;;
-      4) reinstall_kernel ;;
-      5) update_system ;;
-      6) boot_freedom ;;
-      7) diagnostics ;;
-      8) settings_menu ;;
-      9) alias_menu ;;
-      10) break ;;
+      2) grub_repair-classic ;;
+      3) monitor_repair ;;
+      4) regen_initramfs ;;
+      5) reinstall_kernel ;;
+      6) update_system ;;
+      7) boot_freedom ;;
+      8) diagnostics ;;
+      9) settings_menu ;;
+      10) alias_menu ;;
+      11) break ;;
       *) echo -e "${RED}${T[invalid_sel]}${RESET}"; sleep 1 ;;
     esac
   done
