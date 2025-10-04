@@ -31,17 +31,16 @@ Perfect for use from a **live environment** when your motherboard fails to detec
   
 ## 🖥 Supported Distributions
 
-| Distribution  | UEFI Support | BIOS Support |
-|---------------|--------------|--------------|
-| Arch Linux    | ✅           | ✅           |
-| EndeavourOS   | ✅           | ✅           |
-| CachyOS       | ✅           | ✅           |
-| Debian        | ✅           | ✅           |
-| Ubuntu        | ✅           | ✅           |
-| Fedora        | ✅           | ✅           |
-| openSUSE      | ✅           | ✅           |
-| NixOS         | ✅           | ✅           |
-
+| Distribution  | UEFI Support | BIOS Support | Tested |
+|---------------|--------------|--------------|--------|
+| Arch Linux    | ✅           | ✅           | ✅     |
+| EndeavourOS   | ✅           | ✅           | ✅     |
+| CachyOS       | ✅           | ✅           | ✅     |
+| Debian        | ✅           | ✅           | ✅     |
+| Ubuntu        | ✅           | ✅           | ❌     |
+| Fedora        | ✅           | ✅           | ✅     |
+| openSUSE      | ✅           | ✅           | ❌     |
+| NixOS         | ✅           | ✅           | ❌     |
 
 ---
 
