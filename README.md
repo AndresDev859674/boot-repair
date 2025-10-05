@@ -165,8 +165,19 @@ installing From GIT is more Accessible!
    - Select options
    - Make options and more
 
----
+### Rolling-release
+For Rolling-releases please go to The Boot-repair directory and
 
+1. **Make Executable The Script**
+    ```bash
+    chmod +x *.sh
+    ```
+2. **Run the script**
+    ```bash
+    sudo ./rolling-release.sh
+    ```
+    Put your Password
+---
 
 ## Installing in AUR (For Arch Users)
 
