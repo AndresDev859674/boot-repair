@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #========================================================
-#  BootRepair v0.1.2
+#  BootRepair v0.1.2.1
 #  License: MIT
 #  Description: Swiss-army live rescue tool: GRUB repair, display reset,
 #               initramfs, kernel, system update, boot freedom, diagnostics.
@@ -12,6 +12,7 @@ START_TIME=$(date +%s)
 
 # Colors
 RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; BLUE="\e[34m"; CYAN="\e[36m"; RESET="\e[0m"
+RED_LIGHT='\033[1;31m'
 
 #-----------------------
 # Language (EN/ES/DE/PT)
@@ -121,7 +122,8 @@ ascii_banner() {
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} v0.1.2 ===${RESET}"
+  echo -e "${YELLOW}=== ${T[title]} v0.1.2.1 ===${RESET}"
+  echo ""
 }
 
 pause() { read -r -p "${T[press_enter]}" _ </dev/tty; }
@@ -625,105 +627,9 @@ grub_repair() {
     fi
 }
 
-grub_repair_experimental() {
-    RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
-    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-    LOGFILE="/var/log/grub_repair_${TIMESTAMP}.log"
-
-    echo -e "${CYAN}=== GRUB Repair Experimental ===${RESET}"
-    [[ $EUID -ne 0 ]] && { echo -e "${RED}Debes ser root.${RESET}"; return 1; }
-
-    # Detect distro
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        DISTRO=$ID
-    else
-        echo -e "${RED}No se pudo detectar la distribución.${RESET}"
-        return 1
-    fi
-    echo -e "${GREEN}Distro detectada:${RESET} $DISTRO"
-
-    # Detect boot mode
-    if [ -d /sys/firmware/efi ]; then
-        BOOT_MODE="UEFI"
-    else
-        BOOT_MODE="BIOS"
-    fi
-    echo -e "${GREEN}Modo detectado:${RESET} $BOOT_MODE"
-
-    # Ask partitions
-    read -rp "Partición raíz (ej: /dev/sda2): " ROOT_PART
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        read -rp "Partición EFI (ej: /dev/sda1): " EFI_PART
-    fi
-
-    # Mount
-    mount "$ROOT_PART" /mnt || return 1
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        mkdir -p /mnt/boot/efi
-        mount "$EFI_PART" /mnt/boot/efi || return 1
-    fi
-
-    # Backup automático
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        BACKUP_DIR="/mnt/boot/efi/EFI/Backup_${TIMESTAMP}"
-        mkdir -p "$BACKUP_DIR"
-        cp -a /mnt/boot/efi/EFI/* "$BACKUP_DIR"/ 2>/dev/null || true
-        efibootmgr -v > "$LOGFILE.nvram" 2>/dev/null || true
-        echo -e "${YELLOW}Backup del ESP en:${RESET} $BACKUP_DIR"
-        echo -e "${YELLOW}Entradas NVRAM guardadas en:${RESET} $LOGFILE.nvram"
-    fi
-
-    # Helper chroot
-    run_in_chroot() {
-        if command -v arch-chroot >/dev/null; then
-            arch-chroot /mnt /bin/bash -c "$1"
-        else
-            mount --bind /dev /mnt/dev
-            mount --bind /proc /mnt/proc
-            mount --bind /sys /mnt/sys
-            chroot /mnt /bin/bash -c "$1"
-        fi
-    }
-
-    # Install GRUB
-    case "$DISTRO" in
-        arch|endeavouros|cachyos)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
-            else
-                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && grub-mkconfig -o /boot/grub/grub.cfg"
-            fi
-            ;;
-        debian|ubuntu)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "update-grub"
-            else
-                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && update-grub"
-            fi
-            ;;
-        fedora|opensuse*|suse)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "grub2-mkconfig -o /boot/grub2/grub.cfg"
-            else
-                run_in_chroot "grub2-install --target=i386-pc /dev/sda --recheck && grub2-mkconfig -o /boot/grub2/grub.cfg"
-            fi
-            ;;
-        nixos)
-            run_in_chroot "nixos-rebuild boot"
-            ;;
-        *)
-            echo -e "${RED}Distro no soportada automáticamente.${RESET}"
-            ;;
-    esac
-
-    echo -e "${GREEN}Reparación de GRUB completada.${RESET}"
+systemd_repair() {
+  chmod +x *.sh
+  ./systemd.sh
 }
 
 grub_repair-classic() {
@@ -930,6 +836,13 @@ update_system() {
   fi
   echo -e "${GREEN}${T[done]}${RESET}"
   pause
+}
+
+boot-repair-ubuntu() {
+  sudo apt install -y wget;
+  wget -O- https://sourceforge.net/projects/boot-repair/files/key.gpg | sudo tee /etc/apt/keyrings/boot-repair.gpg;
+  echo 'deb [signed-by=/etc/apt/keyrings/boot-repair.gpg] https://ppa.launchpadcontent.net/yannubuntu/boot-repair/ubuntu noble main' | sudo tee /etc/apt/sources.list.d/boot-repair.list;
+  sudo apt update && sudo apt install -y boot-repair
 }
 
 boot_freedom() {
@@ -1195,6 +1108,15 @@ EOF
   done
 }
 
+TIPS=$(cat << 'EOF'
+You can use boot-repair on your PC and then go to the Live user and mount your partitions and chroot and use boot-repair as a repair without installing inside the Live User
+Use '!!' to repeat the last command in your terminal. For example, 'sudo !!' repeats the last command with sudo.
+'Ctrl + R' allows you to search through your command history. Start typing a part of the command you want to reuse.
+Combine 'find' and 'xargs' for powerful file operations, like 'find . -name "*.log" | xargs rm'.
+To see a live view of your network traffic, use 'iftop' (you might need to install it first).
+Use 'nohup' or 'screen'/'tmux' to run a command in the background, even if you close the terminal.
+EOF
+)
 
 #-----------------------
 # Menu
@@ -1205,9 +1127,16 @@ main_menu() {
     ascii_banner
     info_header
     echo -e "${YELLOW}=== ${T[menu_title]} ===${RESET}"
+
+    RANDOM_TIP=$(echo "$TIPS" | shuf -n 1)
+
     echo ""
-    echo "TIP : You can use boot-repair on your PC and then go to the Live user and mount your partitions and chroot and use boot-repair as a repair without installing inside the Live User"
+    echo -e "${RED_LIGHT}TIP (boot-repair and Terminal tips):${RESET}"
+    echo "$RANDOM_TIP"
     echo ""
+    news
+    echo ""
+    echo -e "${GREEN}=== Options ===${RESET}"
     echo "${T[m1]}"
     echo "2) Repair GRUB Classic (most Stable + Recommended)"
     echo "${T[m2]}"
@@ -1221,7 +1150,7 @@ main_menu() {
     echo "${T[m9]}"
     local choice; read -r -p "${T[enter_choice]} >> " choice </dev/tty
     case "$choice" in
-      1) grub_repair ;;
+      1) disabled ;;
       2) grub_repair-classic ;;
       3) monitor_repair ;;
       4) regen_initramfs ;;
@@ -1237,6 +1166,15 @@ main_menu() {
   done
 }
 
+news() {
+    echo -e "${BLUE}=== News ===${RESET}"
+    echo "New Edition for boot-repair called Rolling-Release (5/10/25)"
+}
+
+disabled() {
+    echo -e "${RED}Sorry But this Function is disabled, Please use other or other version but stable${RESET}"
+    pause
+}
 
 #-----------------------
 # Entry / CLI flags
@@ -1253,7 +1191,8 @@ case "${1:-}" in
   -update) update_system; exit 0 ;;
   -bootcfg) boot_freedom; exit 0 ;;
   -aliases) alias_menu; exit 0 ;;
-  -grub-experimental) grub_repair_experimental; exit 0 ;;
+  -boot-repair-ubuntu) boot-repair-ubuntu; exit 0 ;;
+  -systemd) systemd_repair; exit 0 ;;
   -changelog) changelog_menu; exit 0 ;;
   -auto)
     # Fire-and-forget: try to auto-repair GRUB with defaults
@@ -1279,14 +1218,32 @@ DURATION=$((END_TIME - START_TIME))
 
 #!/bin/bash
 
-echo -e "${BLUE}"
-# Carpeta donde guardaste los ASCII
-CARPETA="./art"
+# 1. Define the installation path for AUR/FHS standard
+AUR_ART_PATH="/usr/share/boot-repair-andres/art"
 
-# Elegir un archivo aleatorio de la carpeta
-archivo=$(ls "$CARPETA" | shuf -n 1)
-# Mostrarlo con cat
-cat "$CARPETA/$archivo"
+# 2. Check if the AUR-installed path exists.
+if [ -d "$AUR_ART_PATH" ]; then
+    # If it exists (package installed), use the absolute path.
+    CARPETA="$AUR_ART_PATH"
+else
+    # If it doesn't exist (direct execution from git repo), use the relative path.
+    CARPETA="./art"
+fi
+
+# 3. Safely use the directory variable
+echo -e "${BLUE}"
+
+# Ensure the art directory actually exists before trying to display.
+if [ -d "$CARPETA" ]; then
+    archivo=$(ls "$CARPETA" | shuf -n 1)
+    cat "$CARPETA/$archivo"
+else
+    # Fallback if art is not found
+    echo "Art not found! Using plain text."
+    echo "Boot Repair Andres"
+fi
+
+echo ""
 
 echo ""
 echo -e "${RESET}${CYAN}${T[done]}${RESET}" 
