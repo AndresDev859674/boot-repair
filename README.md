@@ -251,7 +251,7 @@ If you want to go back to other versions (Some are stable) With this you can!
 
 | Version                 | ID           | Day          |
 |-------------------------|--------------|--------------|
-| 0.1.1 (not working)     | ./0.1.1.sh   | ❌           |
+| 0.1.2                   | ./0.1.2.sh   | `4/10/25`    |
 | 0.1.0                   | ./.0.1.0.sh  | ❌           |
 
 ### Installing
