@@ -26,7 +26,9 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 ---
 
 ### Seccions
-[https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#installation](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#installation)
+[Supported Distros](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#-supported-distributions)
+[Prerequisites](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#-prerequisites))
+[Installation](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#installation)
 
 ## Reliability and Project Scope
 
@@ -135,6 +137,9 @@ sudo pacman -S git
 ---
 
 # Installation
+ - [Easy/Fast Methods (Only for Arch/Fedora)](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#easyfast-methods-only-for-archfedora)
+ - [Older Versions](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#%EF%B8%8F-older-versions)
+
 ## Installing form GIT (***For all Distros! + more time...***)
 installing From GIT is more Accessible!
 
