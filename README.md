@@ -131,6 +131,7 @@ sudo pacman -S git
 ```
 ---
 
+# Installation
 ## Installing form GIT (***For all Distros! + more time...***)
 installing From GIT is more Accessible!
 
@@ -201,14 +202,17 @@ For Rolling-releases please go to The Boot-repair directory and
 
 For Arch Users, This is the easy Method for you!
 
-## Installing in copr (For Fedora Users)
+## Installing in copr (For Fedora Users) 
+copr is a repository for Fedora to install more than `34,000` packages
+
+![image](https://github.com/user-attachments/assets/c833bc5f-6667-4c89-9b8e-c9de9bc50fc4)
 
 1. **Installing form COPR**
-   Just install from copr using copr!
+   This command will enable you to the repository
     ```bash
     sudo dnf copr enable andres8596/boot-repair-andres
     ```
-   Next Pass :
+   And now install `boot-repair-andres`! :
    ```bash
     sudo dnf install boot-repair-andres
     ```
