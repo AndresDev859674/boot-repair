@@ -179,6 +179,7 @@ For Rolling-releases please go to The Boot-repair directory and
     Put your Password
 ---
 
+# Easy/Fast Methods (Only for Arch/Fedora)
 ## Installing in AUR (For Arch Users)
 
 1. **Installing form AUR**
@@ -199,6 +200,31 @@ For Rolling-releases please go to The Boot-repair directory and
    - Make options and more
 
 For Arch Users, This is the easy Method for you!
+
+## Installing in copr (For Fedora Users)
+
+1. **Installing form COPR**
+   Just install from copr using copr!
+    ```bash
+    sudo dnf copr enable andres8596/boot-repair-andres
+    ```
+   Next Pass :
+   ```bash
+    sudo dnf install boot-repair-andres
+    ```
+
+4. **Run the script**
+    ```bash
+    sudo boot-repair
+    ```
+    Put your Password
+
+4. **Follow the on-screen instructions**  
+   The script will:
+   - Select options
+   - Make options and more
+
+For Fedora Users, This is the easy Method for you!
 
 ---
 
