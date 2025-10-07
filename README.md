@@ -22,7 +22,6 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 >
 
 ***This Script is most Perfect in Arch Linux***
-
 ---
 
 ### Seccions
@@ -317,6 +316,16 @@ Let's to Use Older Versions
    The script will:
    - Select options
    - Make options and more
+
+## Star History
+
+<a href="https://www.star-history.com/#AndresDev859674/boot-repair&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=AndresDev859674/boot-repair&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AndresDev859674/boot-repair&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AndresDev859674/boot-repair&type=Date" />
+ </picture>
+</a>
 
 ---
 [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AndresDev859674/boot-repair)
