@@ -1,3 +1,5 @@
+<img width="950" height="500" alt="boot-repair-intro" src="https://github.com/user-attachments/assets/33ba167a-8052-48c9-8e90-1b6bd7d06dc9" />
+
 ```
 ,--.                   ,--.                                      ,--.       
 |  |-.  ,---.  ,---. ,-'  '-.,-----.,--.--. ,---.  ,---.  ,--,--.`--',--.--.
@@ -22,6 +24,7 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 >
 
 ***This Script is most Perfect in Arch Linux***
+
 ---
 
 ### Seccions
