@@ -19,7 +19,7 @@ BuildArch:      noarch
 %{summary}
 
 %prep
-%setup -q -n boot-repair
+%setup -q -T -n boot-repair
 
 %install
 
