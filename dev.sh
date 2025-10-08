@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #========================================================
-#  BootRepair Rolling Release 8/10/25
+#  BootRepair Dev 8/10/25
 #  License: MIT
 #  Description: Swiss-army live rescue tool: GRUB repair, display reset,
 #               initramfs, kernel, system update, boot freedom, diagnostics.
@@ -124,9 +124,9 @@ ascii_banner() {
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} Rolling Release ===${RESET}"
+  echo -e "${YELLOW}=== ${T[title]} Dev ===${RESET}"
   echo ""
-  echo "Be careful what you touch in this Rolling Release version!"
+  echo "Be careful what you touch in this Dev version!"
   echo ""
 }
 
@@ -974,7 +974,7 @@ news() {
     echo -e "${BLUE}=== News ===${RESET}"
     echo -e "${GREEN}Added Repair Linux and FreeBSD (7/10/25)${RESET}"
     echo -e "${KOFIAD}Added ko-fi for Support us! (help us, we are humble with an Intel i3 + 7/10/25)${RESET}"
-    echo "New Edition for boot-repair called Rolling-Release (5/10/25)"
+    echo "New Edition for boot-repair called Dev (5/10/25)"
 }
 
 disabled() {
