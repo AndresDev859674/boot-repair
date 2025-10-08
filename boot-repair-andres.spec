@@ -7,7 +7,7 @@ URL:            https://github.com/AndresDev859674/boot-repair
 
 Source1:        boot-repair-andres.desktop
 Source2:        com.andresdev859674.boot-repair.policy
-Source3:        boot-repair-andres-512.png
+Source3:        boot-repair-andres.png
 Source4:        boot-repair-andres-128.png
 
 BuildRequires:  bash, git 
