@@ -5,8 +5,6 @@ Summary:        Swiss-army live rescue tool: GRUB repair, display reset, initram
 License:        MIT
 URL:            https://github.com/AndresDev859674/boot-repair
 
-Source:         https://github.com/AndresDev859674/boot-repair/archive/v%{version}/boot-repair-v%{version}.tar.gz
-
 Source1:        boot-repair-andres.desktop
 Source2:        com.andresdev859674.boot-repair.policy
 Source3:        boot-repair-andres-512.png
@@ -22,7 +20,7 @@ BuildArch:      noarch
 
 %prep
 
-%setup -q -n boot-repair-%{version}
+%setup -q -n boot-repair
 
 %install
 
@@ -30,13 +28,6 @@ install -Dm755 boot-repair.sh %{buildroot}/usr/bin/boot-repair
 
 install -d -m755 %{buildroot}/usr/share/boot-repair-andres
 cp -r art %{buildroot}/usr/share/boot-repair-andres/
-
-install -Dm644 %{SOURCE3} %{buildroot}/usr/share/icons/hicolor/512x512/apps/boot-repair-andres.png
-install -Dm644 %{SOURCE4} %{buildroot}/usr/share/icons/hicolor/128x128/apps/boot-repair-andres.png
-
-install -Dm644 %{SOURCE1} %{buildroot}/usr/share/applications/boot-repair-andres.desktop
-
-install -Dm644 %{SOURCE2} %{buildroot}/usr/share/polkit-1/actions/com.andresdev859674.boot-repair.policy
 
 %files
 /usr/bin/boot-repair
