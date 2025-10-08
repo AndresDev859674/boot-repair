@@ -7,7 +7,7 @@
 ```
 also known ***boot-repair-andres***
 
-`0.1.2`
+`0.1.2.1`
 
 - A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
