@@ -1,5 +1,3 @@
-<img width="950" height="500" alt="boot-repair-intro" src="https://github.com/user-attachments/assets/33ba167a-8052-48c9-8e90-1b6bd7d06dc9" />
-
 ```
 ,--.                   ,--.                                      ,--.       
 |  |-.  ,---.  ,---. ,-'  '-.,-----.,--.--. ,---.  ,---.  ,--,--.`--',--.--.
@@ -325,6 +323,8 @@ Let's to Use Older Versions
    The script will:
    - Select options
    - Make options and more
+
+<img width="950" height="500" alt="boot-repair-intro" src="https://github.com/user-attachments/assets/33ba167a-8052-48c9-8e90-1b6bd7d06dc9" />
 
 ## Star History
 
