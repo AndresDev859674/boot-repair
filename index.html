@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>boot-repair-andres | Linux Boot Repair Utility</title>
+    <!-- Load Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the dark theme and typography */
+        :root {
+            --primary-color: #fcc624; /* Linux yellow accent */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* GitHub Dark Background */
+            color: #c9d1d9; /* Light Text */
+            scroll-behavior: smooth; /* Smooth scrolling for navigation links */
+        }
+        .text-primary { color: var(--primary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+        .border-primary { border-color: var(--primary-color); }
+        .hero-font {
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 0 10px rgba(252, 198, 36, 0.4);
+        }
+        .code-block {
+            background-color: #161b22; /* Dark code block background */
+            border-left: 4px solid var(--primary-color);
+        }
+        .section-anchor {
+            /* Offset for fixed navbar */
+            padding-top: 6rem;
+            margin-top: -6rem;
+        }
+
+        /* Styles for Distro details table */
+        .distro-table details {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #30363d;
+            border-radius: 0.5rem;
+            background-color: #161b22;
+        }
+        .distro-table summary {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Style for the fixed ASCII Art rendering */
+        .ascii-art {
+            white-space: pre;
+            line-height: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem; /* Base size */
+        }
+        @media (min-width: 640px) {
+            .ascii-art { font-size: 1rem; }
+        }
+        @media (min-width: 1024px) {
+            .ascii-art { font-size: 1.25rem; }
+        }
+
+        /* Style for Badges */
+        .badge-list img {
+            height: 24px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Fixed Navbar -->
+    <nav class="fixed top-0 left-0 right-0 bg-[#161b22] border-b border-[#30363d] shadow-lg z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <a href="#hero" class="text-2xl font-extrabold text-primary hero-font tracking-tighter">
+                boot-repair-andres
+            </a>
+            <div class="space-x-4">
+                <a href="#docs" class="text-gray-300 hover:text-primary transition duration-150 font-medium">Wiki / Docs</a>
+                <a href="#installation" class="text-gray-300 hover:text-primary transition duration-150 font-medium">Installation</a>
+                <a href="#supported-distros" class="text-gray-300 hover:text-primary transition duration-150 font-medium">Distros</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+
+        <!-- Main Section (Hero) -->
+        <section id="hero" class="section-anchor text-center mb-20 p-8 rounded-xl border border-[#30363d] bg-[#161b22]/50">
+            <h1 class="text-5xl sm:text-7xl font-extrabold mb-4 text-white hero-font">
+                boot-repair-andres
+            </h1>
+            <pre class="ascii-art text-primary mx-auto mb-6 text-center">
+,--.                   ,--.                                      ,--.       
+|  |-.  ,---.  ,---. ,-'  '-.,-----.,--.--. ,---.  ,---.  ,--,--.`--',--.--.
+| .-. '| .-. || .-. |'-.  .-''-----'|  .--'| .-. :| .-. |' ,-.  |,--.|  .--'
+| `-' |' '-' '' '-' '  |  |         |  |   \   --.| '-' '\ '-'  ||  ||  |   
+ `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
+</pre>
+            <p class="text-lg sm:text-xl text-gray-400 max-w-4xl mx-auto mb-6">
+                The definitive **Linux boot repair tool**. A simple script that provides options to restore your system’s bootloader, such as **Screen** or **GRUB**, ideal for use from a **live environment** when your motherboard fails to detect the bootloader.
+            </p>
+            <p class="text-base text-gray-500 italic mb-4">
+                Current Version: <strong class="text-primary">0.1.2.1</strong>
+            </p>
+
+            <!-- Badges -->
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mt-4">
+                <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+                <img src="https://img.shields.io/badge/Language-Shell-green" alt="Shell">
+                <img src="https://img.shields.io/badge/bash_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash Script">
+                <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
+            </div>
+
+            <!-- Note -->
+            <div role="alert" class="mt-8 p-3 text-sm rounded-lg bg-blue-900/50 border border-blue-700/50 text-blue-300 mx-auto max-w-lg">
+                <span class="font-bold">NOTE:</span> This is a new version of *Auto-GRUB-Repair-Script* with aliases and more. This script is most **Perfect in Arch Linux**.
+            </div>
+        </section>
+
+        <!-- Documentation (Wiki) -->
+        <section id="docs" class="section-anchor">
+            <h2 class="text-4xl font-bold border-b border-primary/50 pb-3 mb-8 text-white">
+                Wiki / Project Overview
+            </h2>
+
+            <!-- Reliability and Scope -->
+            <div class="mb-12 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Reliability and Project Scope</h3>
+                <p class="text-gray-400 mb-4">
+                    The current version of this tool is designed to address specific boot issues, primarily focusing on robust and reliable solutions within those defined boundaries.
+                </p>
+
+                <p class="text-lg font-semibold text-gray-300">Our core reliability currently lies in:</p>
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-400">
+                    <li>**GRUB Repair:** Providing effective and tested solutions for fixing GRUB bootloader issues across a wide range of supported distributions.</li>
+                    <li>**System Diagnostics:** Offering utilities to diagnose screen/display issues and perform essential technical checks on the boot configuration.</li>
+                </ul>
+
+                <p class="text-gray-400 mt-4">
+                    **Our Current Scope:** Our primary path involves interacting with **bootloaders** (currently GRUB-focused) and performing necessary **technical configurations** to restore system functionality. While our focus is narrow now, we aim for maximum dependability within that scope.
+                </p>
+                <p class="mt-4 italic text-sm text-gray-500">
+                    *I'm very obsessed with bootloaders lol*
+                </p>
+            </div>
+
+            <!-- Features -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Features <span class="text-gray-500 text-base italic">(more coming soon...)</span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ul class="space-y-3 text-gray-300">
+                        <li>✅ **Multi‑distro support** with automatic detection.</li>
+                        <li>✅ **UEFI or BIOS** boot mode selection.</li>
+                        <li>✅ **Interactive safety prompts** before making changes.</li>
+                        <li>✅ **Motherboard/system info** display.</li>
+                        <li>✅ **Execution time summary**.</li>
+                    </ul>
+                    <ul class="space-y-3 text-gray-300">
+                        <li>✅ **ASCII art + color‑coded output** for style.</li>
+                        <li>✅ **Reboot option** at the end.</li>
+                        <li>✅ **Repair Monitor**.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Goals and Roadmap -->
+            <div class="mb-12 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">🎯 Project Goals & Roadmap</h3>
+                <p class="text-gray-400 mb-4">
+                    Our primary objective is to expand compatibility beyond current limits. We are actively working on the following major goals:
+                </p>
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-300">
+                    <li>**Operating System Expansion:** Implement full support for **FreeBSD** and **Alpine Linux**.</li>
+                    <li>**Bootloader Diversity:** Integrate support for alternative bootloaders including **Systemd-boot**, **rEFInd**, and **Limine**.</li>
+                </ul>
+                <p class="mt-4 italic text-sm text-gray-500">
+                    Linux is a long world to explore, we are looking for what we can to fix common problems.
+                </p>
+            </div>
+
+            <!-- Repair GNU/GRUB and working -->
+            <div class="mb-12 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">🛠 Repair GNU/GRUB and Operation</h3>
+                <div role="alert" class="mt-4 p-3 text-sm rounded-lg bg-yellow-900/50 border border-yellow-700/50 text-yellow-300 mb-4">
+                    <span class="font-bold">WARNING:</span> This is not a definitive option, it is in process and being investigated. We know it is a bad connection with the motherboard. Be careful.
+                </div>
+
+                <p class="text-gray-400 mb-4">
+                    To repair GRUB:
+                    <ul class="list-disc list-inside ml-4 text-gray-400">
+                        <li>Open **boot-repair** and select `1) Repair Grub`.</li>
+                        <li>Follow the on-screen instructions.</li>
+                    </ul>
+                </p>
+                <!-- Image placeholder, since we cannot host the image -->
+                <div class="mt-6">
+                    <img class="rounded-lg shadow-lg max-w-full h-auto" src="https://placehold.co/950x500/161b22/c9d1d9?text=boot-repair-main-menu.png%0A(Console+Preview)" alt="Preview of the boot-repair script main menu">
+                </div>
+            </div>
+
+            <!-- Using Aliases -->
+            <div class="mb-12 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Installing and Using Aliases (For Git Versions)</h3>
+                <p class="text-gray-400 mb-2">
+                    To install the aliases, open **boot-repair** and select **Option 3**.
+                </p>
+                <p class="text-gray-400 mb-4">
+                    **Quick Flags for Aliases with -string:** (Allows faster operation without menu selections)
+                </p>
+                <code class="block code-block p-3 font-mono text-sm text-gray-300 space-x-2">
+                    -grub -monitor -initramfs -kernel -diag -update -bootcfg -auto
+                </code>
+            </div>
+        </section>
+
+        <!-- Supported Distributions -->
+        <section id="supported-distros" class="section-anchor">
+            <h2 class="text-4xl font-bold border-b border-primary/50 pb-3 mb-8 text-white">
+                🖥 Supported Distributions
+            </h2>
+
+            <!-- Legend -->
+            <div class="mb-8 p-4 rounded-xl bg-[#161b22] border border-[#30363d]">
+                <h3 class="text-xl font-semibold mb-2 text-primary">Status Legend</h3>
+                <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                    <p class="flex items-center space-x-1 text-green-400">✅ **Confirmed Working:** Tested and fully supported.</p>
+                    <p class="flex items-center space-x-1 text-yellow-400">❓ **Should Work / Pending Confirmation:** Expected to work, but testing is pending or needs confirmation.</p>
+                    <p class="flex items-center space-x-1 text-red-400">❌ **Not Supported:** Confirmed not to work or not supported by the project.</p>
+                </div>
+            </div>
+
+            <!-- Base Distributions Table -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Base Distributions</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left table-auto border-collapse border border-gray-700 rounded-lg">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-300">
+                                <th class="p-4 border-b border-gray-700">Distribution</th>
+                                <th class="p-4 border-b border-gray-700 text-center">UEFI</th>
+                                <th class="p-4 border-b border-gray-700 text-center">BIOS</th>
+                                <th class="p-4 border-b border-gray-700 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800 distro-table">
+                            <!-- Arch -->
+                            <tr class="hover:bg-gray-800">
+                                <td class="p-4">
+                                    <details>
+                                        <summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/Arch%20Linux-1793D1?logo=arch-linux&logoColor=fff&style=for-the-badge" alt="Arch" class="h-4"> Arch Linux</summary>
+                                        <div class="mt-2 text-sm text-gray-400">
+                                            **Notes:** Standard Arch installation methods work perfectly. Uses GRUB by default. <br> **Known Issues:** None confirmed.
+                                        </div>
+                                    </details>
+                                </td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                            </tr>
+                            <!-- Debian -->
+                            <tr class="hover:bg-gray-800">
+                                <td class="p-4">
+                                    <details>
+                                        <summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white" alt="Debian" class="h-4"> Debian</summary>
+                                        <div class="mt-2 text-sm text-gray-400">
+                                            **Notes:** Fully compatible with official GRUB package. Tested on Stable and Testing branches.
+                                        </div>
+                                    </details>
+                                </td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                            </tr>
+                            <!-- Ubuntu -->
+                            <tr class="hover:bg-gray-800">
+                                <td class="p-4">
+                                    <details>
+                                        <summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu" class="h-4"> Ubuntu</summary>
+                                        <div class="mt-2 text-sm text-gray-400">
+                                            **Notes:** Full support. If issues arise, use the included `boot-repair` tool.
+                                        </div>
+                                    </details>
+                                </td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                            </tr>
+                            <!-- Other Base Distros -->
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/Fedora-294172?style=for-the-badge&logo=fedora&logoColor=white" alt="Fedora" class="h-4"> Fedora</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/openSUSE-%2364B345?style=for-the-badge&logo=openSUSE&logoColor=white" alt="openSUSE" class="h-4"> openSUSE</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-yellow-400">❓</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/NIXOS-5277C3.svg?style=for-the-badge&logo=NixOS&logoColor=white" alt="NixOS" class="h-4"> NixOS</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-yellow-400">❓</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/Alpine_Linux-0D597F?style=for-the-badge&logo=alpine-linux&logoColor=white" alt="Alpine" class="h-4"> Alpine Linux</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-yellow-400">❓ (Upcoming)</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/Gentoo-9B54FF?style=for-the-badge&logo=gentoo&logoColor=white" alt="Gentoo" class="h-4"> Gentoo</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-red-400">❌</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/FreeBSD-CF2122?style=for-the-badge&logo=freebsd&logoColor=white" alt="FreeBSD" class="h-4"> FreeBSD</td><td class="p-4 text-center text-yellow-400">❓</td><td class="p-4 text-center text-yellow-400">❓</td><td class="p-4 text-center text-yellow-400">❓ (Upcoming)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Derivative Distributions Table -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Derivative Distributions</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left table-auto border-collapse border border-gray-700 rounded-lg">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-300">
+                                <th class="p-4 border-b border-gray-700">Distribution</th>
+                                <th class="p-4 border-b border-gray-700">Base</th>
+                                <th class="p-4 border-b border-gray-700 text-center">UEFI</th>
+                                <th class="p-4 border-b border-gray-700 text-center">BIOS</th>
+                                <th class="p-4 border-b border-gray-700 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800 distro-table">
+                            <!-- Linux Mint -->
+                            <tr class="hover:bg-gray-800">
+                                <td class="p-4">
+                                    <details>
+                                        <summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/Linux%20Mint-87CF3E?style=for-the-badge&logo=Linux%20Mint&logoColor=white" alt="Mint" class="h-4"> Linux Mint</summary>
+                                        <div class="mt-2 text-sm text-gray-400">
+                                            **Notes:** Full support confirmed. Based on Ubuntu/Debian, using standard GRUB configuration.
+                                        </div>
+                                    </details>
+                                </td>
+                                <td class="p-4">Ubuntu (Debian)</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                            </tr>
+                            <!-- Pop!_OS -->
+                            <tr class="hover:bg-gray-800">
+                                <td class="p-4">
+                                    <details>
+                                        <summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/Pop!_OS-48B9C7?style=for-the-badge&logo=pop-os&logoColor=white" alt="Pop!_OS" class="h-4"> Pop!_OS</summary>
+                                        <div class="mt-2 text-sm text-gray-400">
+                                            **Notes:** Uses Systemd-boot by default, not GRUB. Our fix applies to GRUB-only systems. Manual intervention may be needed to switch to GRUB.
+                                        </div>
+                                    </details>
+                                </td>
+                                <td class="p-4">Ubuntu (Debian)</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                                <td class="p-4 text-center text-green-400">✅</td>
+                            </tr>
+                            <!-- Other Derivative Distros -->
+                            <tr class="hover:bg-gray-800"><td class="p-4"><details><summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/-MX%20Linux-%23000000?style=for-the-badge&logo=MXlinux&logoColor=white" alt="MX Linux" class="h-4"> MX Linux</summary><div class="mt-2 text-sm text-gray-400">**Notes:** Fully supported due to Debian/antiX base.</div></details></td><td class="p-4">Debian/antiX</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4"><details><summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/CachyOS-2396B2?style=for-the-badge&logo=arch-linux&logoColor=white" alt="CachyOS" class="h-4"> CachyOS</summary><div class="mt-2 text-sm text-gray-400">**Notes:** Arch-based, full GRUB support confirmed.</div></details></td><td class="p-4">Arch</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/EndeavourOS-2D1935?style=for-the-badge&logo=endeavouros&logoColor=white" alt="EndeavourOS" class="h-4"> EndeavourOS</td><td class="p-4">Arch</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4"><details><summary class="flex items-center space-x-2"><img src="https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=Manjaro&logoColor=white" alt="Manjaro" class="h-4"> Manjaro</summary><div class="mt-2 text-sm text-gray-400">**Notes:** Known to use a customized GRUB. Compatibility highly likely, but confirmation pending.</div></details></td><td class="p-4">Arch</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-yellow-400">❓</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/-Zorin%20OS-%2310AAEB?style=for-the-badge&logo=zorin&logoColor=white" alt="Zorin OS" class="h-4"> Zorin OS</td><td class="p-4">Ubuntu (Debian)</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/Kali-268BEE?style=for-the-badge&logo=kalilinux&logoColor=white" alt="Kali" class="h-4"> Kali</td><td class="p-4">Debian</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-yellow-400">❓</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/-Elementary%20OS-black?style=for-the-badge&logo=elementary&logoColor=white" alt="Elementary OS" class="h-4"> Elementary OS</td><td class="p-4">Ubuntu (Debian)</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-green-400">✅</td><td class="p-4 text-center text-yellow-400">❓</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/FydeOS-2D3D58?style=for-the-badge" alt="FydeOS" class="h-4"> FydeOS</td><td class="p-4">ChromeOS/Gentoo</td><td class="p-4 text-center text-yellow-400">❓</td><td class="p-4 text-center text-yellow-400">❓</td><td class="p-4 text-center text-red-400">❌</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-4 flex items-center space-x-2"><img src="https://img.shields.io/badge/Chrome_OS-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" alt="ChromeOS" class="h-4"> ChromeOS</td><td class="p-4">Gentoo</td><td class="p-4 text-center text-yellow-400">❓</td><td class="p-4 text-center text-yellow-400">❓</td><td class="p-4 text-center text-red-400">❌</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Installation Section -->
+        <section id="installation" class="section-anchor">
+            <h2 class="text-4xl font-bold border-b border-primary/50 pb-3 mb-8 text-white">
+                📦 Installation and Prerequisites
+            </h2>
+
+            <!-- Prerequisites -->
+            <div class="mb-10 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Essential Prerequisites</h3>
+                <p class="text-gray-400 mb-4">
+                    To ensure a smooth process, you must start from a live environment and have **Git** installed.
+                </p>
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-300">
+                    <li>A **Live USB** or live environment of any [Supported Distribution](#supported-distros).</li>
+                    <li>**Internet access** is required for cloning the repository and potentially installing necessary packages.</li>
+                    <li>**Git** must be installed. You can check the installation with `git --version`.</li>
+                </ul>
+
+                <h4 class="text-xl font-semibold mt-6 mb-3 text-gray-300">Installing Git (If necessary)</h4>
+                <div class="code-block p-4 font-mono text-sm text-gray-300">
+                    <p class="text-primary">// Debian, Ubuntu, Mint, Kali, Pop!_OS, etc.</p>
+                    <pre>sudo apt update && sudo apt install git</pre>
+                    <p class="text-primary">// Fedora, Rocky Linux, etc.</p>
+                    <pre>sudo dnf install git</pre>
+                    <p class="text-primary">// Arch, Manjaro, CachyOS, EndeavourOS, etc.</p>
+                    <pre>sudo pacman -S git</pre>
+                </div>
+            </div>
+
+            <!-- GIT Installation -->
+            <div class="mb-10 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Installing from GIT <span class="text-gray-500 text-base italic">(For all Distros! + more time...)</span></h3>
+                <ol class="list-decimal list-inside ml-4 space-y-4 text-gray-300">
+                    <li>
+                        <p class="font-semibold">Clone the repository:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">git clone https://github.com/AndresDev859674/boot-repair.git</code>
+                    </li>
+                    <li>
+                        <p class="font-semibold">Navigate into the project folder:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">cd boot-repair</code>
+                    </li>
+                    <li>
+                        <p class="font-semibold">Make the script executable:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">chmod +x boot-repair.sh</code>
+                    </li>
+                    <li>
+                        <p class="font-semibold">Run the script:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo ./boot-repair.sh</code>
+                        <span class="text-sm text-gray-500 mt-1 block">Enter your password and follow the on-screen instructions.</span>
+                    </li>
+                </ol>
+
+                <h4 class="text-xl font-semibold mt-8 mb-3 text-gray-300">Rolling-release Installation</h4>
+                <ol class="list-decimal list-inside ml-4 space-y-4 text-gray-300">
+                    <li><p class="font-semibold">Make all scripts executable:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">chmod +x *.sh</code></li>
+                    <li><p class="font-semibold">Run the specific script (example):</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo ./rolling-release.sh</code></li>
+                </ol>
+            </div>
+
+            <!-- Easy/Fast Methods (Arch/Fedora) -->
+            <div class="mb-10 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">Easy/Fast Methods <span class="text-gray-500 text-base italic">(Only for Arch/Fedora)</span></h3>
+
+                <h4 class="text-xl font-semibold mt-6 mb-3 text-gray-300">1. Installing from AUR (For Arch Users)</h4>
+                <p class="text-gray-400 mb-2">Just install from AUR using yay:</p>
+                <code class="block code-block p-3 font-mono text-sm text-gray-300">yay -S boot-repair-andres</code>
+                <p class="text-gray-400 mt-3 mb-2">Then run:</p>
+                <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo boot-repair</code>
+
+                <h4 class="text-xl font-semibold mt-8 mb-3 text-gray-300">2. Installing from COPR (For Fedora Users)</h4>
+                <p class="text-gray-400 mb-2">Check COPR status (copr.fedorainfracloud.org) before continuing.</p>
+                <ol class="list-decimal list-inside ml-4 space-y-2 text-gray-300">
+                    <li>
+                        <p class="font-semibold">Enable the repository:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo dnf copr enable andres8596/boot-repair-andres</code>
+                    </li>
+                    <li>
+                        <p class="font-semibold">Install `boot-repair-andres`:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo dnf install boot-repair-andres</code>
+                    </li>
+                    <li>
+                        <p class="font-semibold">Run the script:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo boot-repair</code>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Older Versions -->
+            <div class="mb-10 p-6 rounded-xl bg-[#161b22] shadow-xl border border-[#30363d]">
+                <h3 class="text-2xl font-semibold mb-4 text-primary">⏱️ Older Versions</h3>
+                <p class="text-gray-400 mb-4">If you want to go back to other versions (Some are stable), you can do so with GIT:</p>
+
+                <div class="overflow-x-auto mb-4">
+                    <table class="w-full text-left table-auto border-collapse border border-gray-700 rounded-lg">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-300">
+                                <th class="p-3 border-b border-gray-700">Version</th>
+                                <th class="p-3 border-b border-gray-700">ID</th>
+                                <th class="p-3 border-b border-gray-700">Day</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800 text-gray-400">
+                            <tr class="hover:bg-gray-800"><td class="p-3">0.1.2</td><td class="p-3">./0.1.2.sh</td><td class="p-3">4/10/25</td></tr>
+                            <tr class="hover:bg-gray-800"><td class="p-3">0.1.0</td><td class="p-3">./.0.1.0.sh</td><td class="p-3 text-red-400">❌</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="font-semibold text-gray-300 mb-2">Steps to use Older Versions:</p>
+                <ol class="list-decimal list-inside ml-4 space-y-2 text-gray-400">
+                    <li>Clone the repository (if not already done).</li>
+                    <li>Navigate to the folder: <code class="font-mono text-sm">cd boot-repair</code></li>
+                    <li>Make all scripts executable: <code class="font-mono text-sm">chmod +x *.sh</code></li>
+                    <li>Search for a version: <code class="font-mono text-sm">ls</code></li>
+                    <li><p>Run the version script:</p>
+                        <code class="block code-block p-3 font-mono text-sm text-gray-300">sudo ./*version here*.sh</code></li>
+                </ol>
+            </div>
+            
+        </section>
+
+        <!-- Final Notes -->
+        <section class="section-anchor">
+            <h2 class="text-4xl font-bold border-b border-primary/50 pb-3 mb-8 text-white">
+                ⚠️ Important Notes
+            </h2>
+            <ul class="list-disc list-inside ml-4 space-y-3 text-gray-300 p-6 rounded-xl bg-[#161b22] border border-red-800/50">
+                <li>Run this script **only** from a live environment — **not** from your main OS.</li>
+                <li>Make sure you have **internet access** during the process (some distros require it for package installation).</li>
+                <li>The most perfectly tested version is for **Arch Linux**.</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#161b22] border-t border-[#30363d] p-8 mt-12">
+        <div class="container mx-auto text-center">
+            <h4 class="text-xl font-semibold text-primary mb-4">boot-repair-andres</h4>
+            <div class="flex justify-center space-x-4 mb-4">
+                <a href="https://github.com/AndresDev859674/boot-repair" class="text-gray-400 hover:text-white transition duration-150 flex items-center space-x-1" target="_blank" rel="noopener noreferrer">
+                    <img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" class="h-6">
+                </a>
+                <a href="https://gitlab.com/boot-repair/boot-repair" class="text-gray-400 hover:text-white transition duration-150 flex items-center space-x-1" target="_blank" rel="noopener noreferrer">
+                    <img src="https://img.shields.io/badge/gitlab-%23181717.svg?style=for-the-badge&logo=gitlab&logoColor=white" alt="GitLab" class="h-6">
+                </a>
+                <span class="text-gray-400 flex items-center space-x-1">
+                    <img src="https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white" alt="Git" class="h-6">
+                </span>
+            </div>
+            <p class="text-sm text-gray-500">Made with ❤️ for the Linux community.</p>
+            <p class="text-sm text-gray-500 mt-2">© 2025 boot-repair-andres. All rights reserved.</p>
+            <div class="mt-4 text-xs text-gray-600">
+                <a href="https://www.star-history.com/#AndresDev859674/boot-repair&Date" target="_blank" rel="noopener noreferrer">View Star History</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
