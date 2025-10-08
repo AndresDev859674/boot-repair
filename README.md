@@ -215,6 +215,12 @@ For Arch Users, This is the easy Method for you!
 ## Installing in copr (For Fedora Users) 
 copr is a repository for Fedora to install more than `34,000` packages
 
+**First Check the status of COPR**
+
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/andres8596/boot-repair-andres/package/boot-repair-andres/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/andres8596/boot-repair-andres/package/boot-repair-andres/)
+
+If Copr is in an unknown status it may not be possible to install it using copr
+
 ![image](https://github.com/user-attachments/assets/c833bc5f-6667-4c89-9b8e-c9de9bc50fc4)
 
 1. **Installing form COPR**
