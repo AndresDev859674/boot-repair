@@ -191,19 +191,131 @@ For Rolling-releases please go to The Boot-repair directory and
 # Easy/Fast Methods (Only for Arch/Fedora)
 ## Installing in AUR (For Arch Users)
 
+### Arch Linux Live Environment Setup and AUR Helper Installation
+
+This guide covers the initial steps inside the Arch Linux Live ISO environment, focusing on network connectivity and preparing the system to install packages from the Arch User Repository (AUR) using yay.
+
+1. Verify Boot and Set Keyboard Layout***
+   If your keyboard layout is not US English, change it using loadkeys.
+   ```bash
+    # Example for EN layout (en)
+    loadkeys en
+    ```
+   
+***2. Connect to the Internet***
+   You must have an active internet connection to download and install software.
+
+   **A. Wired Connection (Ethernet)**
+   ```bash
+   ip link
+   ```
+
+   If your interface (e.g., eth0) shows UP and a link, you may already be connected. If not, try starting the DHCP client:
+
+   ```bash
+   dhcpcd
+   ```
+   
+**B. Wireless Connection (Wi-Fi)**
+Use the built-in iwctl utility.
+
+1. List available Wi-Fi devices:
+   ```bash
+   iwctl device list
+   ```
+   (Note the name of your device, usually wlan0 or similar.)
+   
+2. Scan for networks:
+   ```bash
+   iwctl station wlan0 scan
+   ```
+3. List available networks:
+   ```bash
+   iwctl station wlan0 get-networks
+   ```
+4. Connect to your network:
+   ```bash
+   iwctl station wlan0 connect "Your-SSID-Name"
+   ```
+   (Enter your Wi-Fi password when prompted.)
+   
+6. Test the connection:
+    ```bash
+   ping archlinux.org
+   ```
+   If you receive replies, your internet connection is ready.
+
+**3. System Preparation (Time Sync)**
+   Ensure your system clock is accurate, which is essential for secure connections (HTTPS/TLS) during package downloads.
+   ```bash
+   timedatectl set-ntp true
+   ```
+**4. Install an AUR Helper (`yay`)**
+The Arch Live ISO is a minimal environment and does not include Git, which is required to clone and build packages. We need to install the dependencies first.
+   ```bash
+   sudo pacman -S --needed git base-devel
+   ```
+- Note: base-devel is a package group containing essential tools for compiling (like make, gcc, etc.). --needed skips installation if the packages are already present.
+
+**B. Download and Build `yay`**
+We will clone the yay source code into a temporary directory, build it, and install it.
+
+1. Create a temporary directory for building and change into it:
+   ```bash
+   cd /tmp
+   mkdir yay-build
+   cd yay-build
+   ```
+2. Clone the yay repository:
+   ```bash
+   git clone https://aur.archlinux.org/yay.git
+   ```
+3. Change into the cloned directory:
+   ```bash
+   cd yay
+   ```
+4. Build and install the package:
+   ```bash
+   makepkg -si
+   ```
+   This command will download the remaining dependencies, compile `yay`, and install it onto the system. You will be prompted to enter your password and confirm dependencies.
+
+**5. Install Software from AUR**
+Now that `yay` is installed, you can use it to easily fetch and install packages from the AUR, combining the steps of cloning, building, and installing into one command.
+
+1. **Installing form AUR**
+   Just install from AUR using yay!
+    ```bash
+    yay -S boot-repair-andres
+    ```
+    
+2. **Run the script**
+    ```bash
+    sudo boot-repair
+    ```
+    Put your Password
+
+3. **Follow the on-screen instructions**  
+   The script will:
+   - Select options
+   - Make options and more
+
+**Tip**: Remember that everything installed in the live environment will be lost once you shut down the machine, unless you have mounted and are operating within a new installation's chroot environment.
+
+### For Arch Linux with dependencies
 1. **Installing form AUR**
    Just install from AUR using yay!
     ```bash
     yay -S boot-repair-andres
     ```
 
-4. **Run the script**
+2. **Run the script**
     ```bash
     sudo boot-repair
     ```
     Put your Password
 
-4. **Follow the on-screen instructions**  
+3. **Follow the on-screen instructions**  
    The script will:
    - Select options
    - Make options and more
