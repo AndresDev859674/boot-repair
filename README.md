@@ -137,17 +137,32 @@ sudo pacman -S git
 ---
 
 # Installation
- - [Easy/Fast Methods (Only for Arch/Fedora)](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#easyfast-methods-only-for-archfedora)
+ - [Methods for Arch/Fedora](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#easyfast-methods-only-for-archfedora)
  - [Older Versions](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#%EF%B8%8F-older-versions)
 
-## Installing form GIT (***For all Distros! + more time...***)
+## Installing form GIT (**For all Distros!**)
 installing From GIT is more Accessible!
 
+### Automatic installation
+Just open the terminal and put this comand
 
-1. **Clone the repository**
+1. **installation**
     ```bash
-    git clone https://github.com/AndresDev859674/boot-repair.git
+    git clone https://github.com/AndresDev859674/boot-repair.git && cd boot-repair && chmod +x *.sh && sudo ./boot-repair.sh
     ```
+    If you want open again boot-repair without `Alias` is
+   
+    ```bash
+    cd boot-repair && sudo ./boot-repair.sh
+    ```
+    If you want change the directory faster
+    ```bash
+    cd ~/ && cd boot-repair && sudo ./boot-repair.sh
+    ```
+    
+    **BUT** is better create an `Alias`
+    
+### Manual installation (***more time...***)
 
 2. **Navigate into the project folder**
     ```bash
@@ -156,7 +171,7 @@ installing From GIT is more Accessible!
 
 3. **Make Executable The Script**
     ```bash
-    chmod +x boot-repair.sh
+    chmod +x *.sh
     ```
 
 4. **Run the script**
@@ -188,7 +203,7 @@ For Rolling-releases please go to The Boot-repair directory and
     Put your Password
 ---
 
-# Easy/Fast Methods (Only for Arch/Fedora)
+# Methods for Arch/Fedora
 ## Installing in AUR (For Arch Users)
 
 ### Arch Linux Live Environment Setup and AUR Helper Installation
