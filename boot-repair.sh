@@ -446,7 +446,7 @@ grub_repair() {
         if [[ "$boot_mode" == "UEFI" ]]; then
             # Searches for partitions with the 'EFI System Partition' PARTTYPE GUID
             local esp_candidates
-            esp_candidates=($(lsblk -pno NAME,PARTTYPE | awk '$2=="c12a7328-f81f-11d2-ba4b-00a0c93ec93b" {print $1}'))
+            esp_candidates=($(lsblk -lpno NAME,PARTTYPE | awk '$2=="c12a7328-f81f-11d2-ba4b-00a0c93ec93b" {print $1}'))
             if [ ${#esp_candidates[@]} -eq 0 ]; then
                 echo -e "${RED}Error: No EFI System Partition (ESP) found. Try manual mode.${RESET}"
                 exit 1
@@ -470,7 +470,7 @@ grub_repair() {
         echo -e "${YELLOW}Please select your root (/) partition from the list:${RESET}"
         # Show partitions with common Linux filesystems
         local root_candidates
-        root_candidates=($(lsblk -pno NAME,FSTYPE | awk '$2 ~ /ext4|btrfs|xfs|f2fs/ {print $1}'))
+        root_candidates=($(lsblk -lpno NAME,FSTYPE | awk '$2 ~ /ext4|btrfs|xfs|f2fs/ {print $1}'))
         if [ ${#root_candidates[@]} -eq 0 ]; then
             echo -e "${RED}Error: No partitions with common Linux filesystems found. Try manual mode.${RESET}"
             exit 1
