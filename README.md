@@ -7,7 +7,7 @@
 ```
 also known ***boot-repair-andres***
 
-`0.1.2.1`
+`0.1.3`
 
 - A simple script that which gives you options to repair your boot like ***Screen*** or ***GRUB*** to restore your system’s bootloader.  
 Perfect for use from a **live environment** when your motherboard fails to detect the bootloader.
@@ -20,6 +20,8 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 > [!NOTE]
 > This is a new version of Auto-GRUB-Repair-Script with aliases and more
 >
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R6R81MGUEA)
 
 ***This Script is most Perfect in Arch Linux***
 
