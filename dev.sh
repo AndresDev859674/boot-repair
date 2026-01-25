@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #========================================================
-#  BootRepair Dev 8/10/25
+#  BootRepair Dev 25/1/26
 #  License: MIT
 #  Description: Swiss-army live rescue tool: GRUB repair, display reset,
 #               initramfs, kernel, system update, boot freedom, diagnostics.
@@ -37,15 +37,15 @@ if [[ "$LANG_CODE" == "en" ]]; then
   T[secure_off]="DISABLED"
   T[secure_unknown]="Unknown"
   T[menu_title]="Main menu"
-  T[m1]="2) Repair GRUB"
-  T[m2]="8) Reset monitor configs (Wayland/Hyprland/Xorg)"
-  T[m3]="9) Regenerate initramfs"
-  T[m4]="10) Reinstall kernel"
-  T[m5]="11) Update operating system"
-  T[m6]="12) Boot freedom (timeout, default, EFI, os-prober)"
-  T[m7]="13) Quick diagnostics"
-  T[m8]="14) Settings (language, expert mode, install alias)"
-  T[m9]="17) Exit"
+  T[m1]="1) Repair GRUB"
+  T[m2]="2) Reset monitor configs (Wayland/Hyprland/Xorg)"
+  T[m3]="3) Regenerate initramfs"
+  T[m4]="4) Reinstall kernel"
+  T[m5]="5) Update operating system"
+  T[m6]="6) Boot freedom (timeout, default, EFI, os-prober)"
+  T[m7]="7) Quick diagnostics"
+  T[m8]="8) Settings (language, expert mode, install alias)"
+  T[m9]="11) Exit"
   T[enter_choice]="Choose an option"
   T[press_enter]="Press Enter to continue..."
   T[need_root]="This script requires administrator privileges (sudo)."
@@ -371,171 +371,365 @@ show_usage() {
     exit 1
 }
 
-
-repair_systemdbot() {
-  chmod +x *.sh
-  ./repair_systemdbot.sh
-}
-
-repair_linux() {
-  chmod +x *.sh
-  ./repair_linux.sh
-}
-
-repair_freebsd() {
-  chmod +x *.sh
-  ./repair_freebsd.sh
-}
-
-new-repair_grub() {
-  chmod +x *.sh
-  ./repair_grub.sh
-}
-
-repair_efind() {
-  chmod +x *.sh
-  ./repair_efind.sh
-}
-
-repair_limine() {
-  chmod +x *.sh
-  ./repair_limine.sh
-}
-
+# --- Main Repair Function ---
 grub_repair() {
-    # Colors
-    RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
+    # Set a trap to call cleanup() on script exit, interruption, or termination.
+    trap cleanup EXIT INT TERM
 
-    # Detect distribution
+    # --- 1. Initial Checks ---
+    echo -e "${BLUE}${BOLD}--- GRUB Advanced Repair Tool ---${RESET}"
+
+    # Check if running as root
+    if [[ "$EUID" -ne 0 ]]; then
+        echo -e "${RED}Error: This script requires superuser privileges.${RESET}"
+        show_usage
+    fi
+
+    # Check for necessary dependencies
+    for cmd in lsblk mount umount chroot grub-install; do
+        if ! command -v "$cmd" &>/dev/null; then
+            echo -e "${RED}Error: Required command '${BOLD}$cmd${RESET}${RED}' not found. Please install it.${RESET}"
+            exit 1
+        fi
+    done
+    echo -e "${GREEN}All necessary dependencies are present.${RESET}"
+
+    # --- 2. System Detection ---
+    echo -e "\n${CYAN}>>> Detecting system configuration...${RESET}"
+
+    # Detect architecture
+    local arch
+    arch=$(uname -m)
+    local grub_target_arch=""
+    case "$arch" in
+        "x86_64")   grub_target_arch="x86_64" ;;
+        "i386"|"i686") grub_target_arch="i386" ;;
+        "aarch64")  grub_target_arch="arm64" ;;
+        "armv7l"|"armv6l") grub_target_arch="arm" ;;
+        *)
+            echo -e "${RED}Error: Unsupported architecture ('${BOLD}$arch${RESET}${RED}').${RESET}"
+            exit 1
+            ;;
+    esac
+    echo -e "  ${GREEN}Architecture detected:${RESET} $arch"
+
+    # Detect boot mode (UEFI or BIOS)
+    local boot_mode=""
+    if [ -d /sys/firmware/efi/efivars ]; then
+        boot_mode="UEFI"
+    else
+        boot_mode="BIOS"
+    fi
+    echo -e "  ${GREEN}Boot mode detected:${RESET} $boot_mode"
+
+    # --- 3. Partition Selection ---
+    echo -e "\n${CYAN}>>> Partition Selection ---${RESET}"
+    echo "1) Automatic detection"
+    echo "2) Manual selection"
+    local selection_mode
+    read -rp "Choose a mode [1/2]: " selection_mode
+
+    local root_part=""
+    local efi_part=""
+
+    if [[ "$selection_mode" == "2" ]]; then
+        # --- Manual Mode ---
+        echo -e "\n${YELLOW}Listing available disks and partitions:${RESET}"
+        lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT
+        echo -e "${YELLOW}Please identify your partitions (e.g., /dev/sda2).${RESET}"
+
+        read -rp "Enter your root (/) partition: " root_part
+        if [[ "$boot_mode" == "UEFI" ]]; then
+            read -rp "Enter your EFI (ESP) partition: " efi_part
+        fi
+    else
+        # --- Automatic Mode ---
+        echo -e "\n${YELLOW}Searching for partitions automatically...${RESET}"
+
+# Detect EFI partition (ESP)
+        if [[ "$boot_mode" == "UEFI" ]]; then
+            # Searches for partitions with the 'EFI System Partition' PARTTYPE GUID
+            local esp_candidates
+            esp_candidates=($(lsblk -lpno NAME,PARTTYPE | awk '$2=="c12a7328-f81f-11d2-ba4b-00a0c93ec93b" {print $1}'))
+            if [ ${#esp_candidates[@]} -eq 0 ]; then
+                echo -e "${RED}Error: No EFI System Partition (ESP) found. Try manual mode.${RESET}"
+                exit 1
+            elif [ ${#esp_candidates[@]} -eq 1 ]; then
+                efi_part=${esp_candidates[0]}
+                echo -e "  ${GREEN}EFI partition found:${RESET} $efi_part"
+            else
+                echo -e "${YELLOW}Multiple EFI partitions found. Please choose one:${RESET}"
+                select opt in "${esp_candidates[@]}"; do
+                    if [[ -n "$opt" ]]; then
+                        efi_part=$opt
+                        break
+                    else
+                        echo "Invalid selection."
+                    fi
+                done
+            fi
+        fi
+
+        # List Linux partitions for the user to choose the root
+        echo -e "${YELLOW}Please select your root (/) partition from the list:${RESET}"
+        # Show partitions with common Linux filesystems
+        local root_candidates
+        root_candidates=($(lsblk -lpno NAME,FSTYPE | awk '$2 ~ /ext4|btrfs|xfs|f2fs/ {print $1}'))
+        if [ ${#root_candidates[@]} -eq 0 ]; then
+            echo -e "${RED}Error: No partitions with common Linux filesystems found. Try manual mode.${RESET}"
+            exit 1
+        fi
+
+        select opt in "${root_candidates[@]}"; do
+            if [[ -n "$opt" ]]; then
+                root_part=$opt
+                break
+            else
+                echo "Invalid selection."
+            fi
+        done
+    fi
+
+    # Validate that selected partitions exist as block devices
+    if ! [ -b "$root_part" ] || ([[ "$boot_mode" == "UEFI" ]] && ! [ -b "$efi_part" ]); then
+        echo -e "${RED}Error: One or more selected partitions are not valid block devices.${RESET}"
+        exit 1
+    fi
+
+    # --- 4. Confirmation and Mounting ---
+    echo -e "\n${CYAN}>>> Operation Summary ---${RESET}"
+    echo -e "  - ${BOLD}Root Partition:${RESET} $root_part"
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        echo -e "  - ${BOLD}EFI Partition:${RESET}  $efi_part"
+    fi
+    echo -e "  - ${BOLD}Boot Mode:${RESET}     $boot_mode"
+    echo -e "\n${YELLOW}WARNING:${RESET} This will modify your system's bootloader files."
+    read -rp "  Do you wish to continue? [y/N]: " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Operation cancelled by user.${RESET}"
+        exit 0
+    fi
+
+    echo -e "\n${CYAN}>>> Mounting the file system...${RESET}"
+    echo "  Mounting $root_part on /mnt..."
+    sudo mount "$root_part" /mnt
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to mount the root partition.${RESET}"; exit 1;
+    else
+        echo -e "  ${GREEN}Root partition mounted successfully.${RESET}"
+    fi
+
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        # Ensure the mount point for EFI exists
+        echo "  Creating mountpoint /mnt/boot/efi if it doesn't exist..."
+        sudo mkdir -p /mnt/boot/efi
+        echo "  Mounting $efi_part on /mnt/boot/efi..."
+        sudo mount "$efi_part" /mnt/boot/efi
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}Error: Failed to mount the EFI partition.${RESET}"; exit 1;
+        else
+            echo -e "  ${GREEN}EFI partition mounted successfully.${RESET}"
+        fi
+    fi
+
+    # --- 5. Preparing the Chroot Environment ---
+    echo -e "\n${CYAN}>>> Preparing the chroot environment...${RESET}"
+    # Mount virtual filesystems necessary for chroot to function correctly
+    echo "  Binding /dev, /proc, and /sys..."
+    for fs in dev proc sys; do
+        sudo mount --make-rslave --bind /$fs /mnt/$fs
+    done
+    echo "  Copying DNS info to chroot for internet connectivity..."
+    sudo cp /etc/resolv.conf /mnt/etc/resolv.conf
+    echo -e "  ${GREEN}Chroot environment is ready.${RESET}"
+
+    # Detect distribution from within the chroot
+    local distro=""
+    if [ -f /mnt/etc/os-release ]; then
+        distro=$(awk -F= '$1=="ID" { print $2 }' /mnt/etc/os-release | tr -d '"')
+        echo -e "  ${GREEN}Distribution detected in ${root_part}:${RESET} ${distro^}"
+    else
+        echo -e "${RED}Error: Could not detect distribution. /etc/os-release not found.${RESET}"
+        exit 1
+    fi
+
+    # --- 6. Executing the Repair ---
+    echo -e "\n${CYAN}>>> Executing GRUB Repair...${RESET}"
+
+    local grub_install_cmd=""
+    local grub_config_cmd=""
+    local pkg_manager_cmd=""
+    local grub_efi_dir="/boot/efi" # Standard in most distros
+
+    # Distribution-specific settings
+    case "$distro" in
+        arch|endeavouros|manjaro)
+            grub_install_cmd="grub-install"
+            grub_config_cmd="grub-mkconfig -o /boot/grub/grub.cfg"
+            pkg_manager_cmd="pacman -S --noconfirm grub efibootmgr" # Reinstall just in case
+            ;;
+        debian|ubuntu|linuxmint)
+            grub_install_cmd="grub-install"
+            grub_config_cmd="update-grub"
+            pkg_manager_cmd="apt-get update && apt-get install --reinstall -y grub-common grub-efi-${grub_target_arch}-signed shim-signed"
+            ;;
+        fedora|centos|rhel)
+            grub_install_cmd="grub2-install"
+            grub_config_cmd="grub2-mkconfig -o /boot/grub2/grub.cfg"
+            pkg_manager_cmd="dnf reinstall -y grub2-efi-${grub_target_arch} shim-${grub_target_arch}"
+            ;;
+        opensuse*|sles)
+            grub_install_cmd="grub2-install"
+            grub_config_cmd="grub2-mkconfig -o /boot/grub2/grub.cfg"
+            pkg_manager_cmd="zypper install --force grub2-x86_64-efi shim"
+            ;;
+        *)
+            echo -e "${RED}Error: Distribution '${distro}' is not supported by this script.${RESET}"
+            exit 1
+            ;;
+    esac
+
+    local full_command=""
+    if [[ "$boot_mode" == "UEFI" ]]; then
+        local secure_boot_fix=""
+        read -rp "  Attempt to reinstall packages for Secure Boot? (Recommended) [y/N]: " fix_sb
+        if [[ "$fix_sb" =~ ^[Yy]$ ]]; then
+            secure_boot_fix="$pkg_manager_cmd && "
+        fi
+
+        # The bootloader-id is the name that will appear in the BIOS/UEFI boot menu
+        full_command="${secure_boot_fix}${grub_install_cmd} --target=${grub_target_arch}-efi --efi-directory=${grub_efi_dir} --bootloader-id=GRUB --recheck && ${grub_config_cmd}"
+
+    else # BIOS Mode
+        local target_disk=""
+        echo -e "${YELLOW}Please choose the disk to install GRUB onto (usually the main disk, not a partition):${RESET}"
+        local disk_candidates
+        disk_candidates=($(lsblk -dno NAME | awk '{print "/dev/"$1}'))
+        select opt in "${disk_candidates[@]}"; do
+            if [[ -n "$opt" ]]; then
+                target_disk=$opt
+                break
+            else
+                echo "Invalid selection."
+            fi
+        done
+        full_command="${grub_install_cmd} --target=${grub_target_arch}-pc --recheck ${target_disk} && ${grub_config_cmd}"
+    fi
+
+    # Execute the final command inside the chroot
+    echo -e "\n${YELLOW}The following commands will be executed inside the chroot:${RESET}"
+    echo -e "${BOLD}$full_command${RESET}"
+    echo -e "${YELLOW}Starting repair process...${RESET}"
+
+    if sudo chroot /mnt /bin/bash -c "$full_command"; then
+        echo -e "\n${GREEN}${BOLD}Success! The GRUB repair process appears to have completed successfully.${RESET}"
+        echo -e "You may now reboot your system."
+    else
+        echo -e "\n${RED}${BOLD}Error: The GRUB repair failed inside the chroot environment.${RESET}"
+        echo -e "Please review the error messages above to diagnose the issue."
+        exit 1
+    fi
+}
+
+grub_repair_experimental() {
+    RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
+    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+    LOGFILE="/var/log/grub_repair_${TIMESTAMP}.log"
+
+    echo -e "${CYAN}=== GRUB Repair Experimental ===${RESET}"
+    [[ $EUID -ne 0 ]] && { echo -e "${RED}You must be root${RESET}"; return 1; }
+
+    # Detect distro
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         DISTRO=$ID
     else
-        echo -e "${RED}Cannot detect your distribution.${RESET}"
+        echo -e "${RED}The distribution could not be detected.${RESET}"
         return 1
     fi
-    echo -e "${GREEN}Detected distribution:${RESET} $DISTRO"
+    echo -e "${GREEN}Distro detected:${RESET} $DISTRO"
 
-    # Select boot mode
-    echo -e "${CYAN}Select boot mode:${RESET}"
-    echo "1) UEFI (recommended)"
-    echo "2) BIOS (Legacy)"
-    read -rp "Choice [1/2]: " BOOT_MODE
-    if [ "$BOOT_MODE" != "1" ] && [ "$BOOT_MODE" != "2" ]; then
-        echo -e "${RED}Invalid choice. Defaulting to UEFI.${RESET}"
-        BOOT_MODE=1
+    # Detect boot mode
+    if [ -d /sys/firmware/efi ]; then
+        BOOT_MODE="UEFI"
+    else
+        BOOT_MODE="BIOS"
+    fi
+    echo -e "${GREEN}Mode detected:${RESET} $BOOT_MODE"
+
+    # Ask partitions
+    read -rp "Root partition (e.g., /dev/sda2): " ROOT_PART
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+        read -rp "EFI partition (e.g.: /dev/sda1): " EFI_PART
     fi
 
-    # Confirm repair
-    echo -e "${YELLOW}WARNING:${RESET} This will modify your bootloader."
-    read -rp "Do you want to proceed? [y/N]: " CONFIRM
-    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Operation cancelled.${RESET}"
-        return 0
+    # Mount
+    mount "$ROOT_PART" /mnt || return 1
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+        mkdir -p /mnt/boot/efi
+        mount "$EFI_PART" /mnt/boot/efi || return 1
     fi
 
-    # Mount partitions
-    read -rp "Enter your root partition (e.g., /dev/sda2): " ROOT_PART
-    if [ "$BOOT_MODE" = "1" ]; then
-        read -rp "Enter your EFI partition (e.g., /dev/sda1): " EFI_PART
-    fi
-    echo -e "${CYAN}Mounting partitions...${RESET}"
-    sudo mount "$ROOT_PART" /mnt
-    if [ "$BOOT_MODE" = "1" ]; then
-        sudo mount "$EFI_PART" /mnt/boot/efi
+    # Backup automático
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+        BACKUP_DIR="/mnt/boot/efi/EFI/Backup_${TIMESTAMP}"
+        mkdir -p "$BACKUP_DIR"
+        cp -a /mnt/boot/efi/EFI/* "$BACKUP_DIR"/ 2>/dev/null || true
+        efibootmgr -v > "$LOGFILE.nvram" 2>/dev/null || true
+        echo -e "${YELLOW}ESP backup in:${RESET} $BACKUP_DIR"
+        echo -e "${YELLOW}NVRAM entries stored in:${RESET} $LOGFILE.nvram"
     fi
 
-    # Helper: run commands in chroot (prefers arch-chroot if available)
+    # Helper chroot
     run_in_chroot() {
         if command -v arch-chroot >/dev/null; then
-            sudo arch-chroot /mnt /bin/bash -c "$1"
+            arch-chroot /mnt /bin/bash -c "$1"
         else
-            sudo mount --bind /dev /mnt/dev
-            sudo mount --bind /proc /mnt/proc
-            sudo mount --bind /sys /mnt/sys
-            sudo chroot /mnt /bin/bash -c "$1"
+            mount --bind /dev /mnt/dev
+            mount --bind /proc /mnt/proc
+            mount --bind /sys /mnt/sys
+            chroot /mnt /bin/bash -c "$1"
         fi
     }
 
-    # Repair GRUB based on distro
+    # Install GRUB
     case "$DISTRO" in
         arch|endeavouros|cachyos)
-            echo -e "${YELLOW}Running Arch-based GRUB repair...${RESET}"
-            if [ "$BOOT_MODE" = "1" ]; then
-                run_in_chroot "
-                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
-                    grub-mkconfig -o /boot/grub/grub.cfg
-                "
+            if [ "$BOOT_MODE" = "UEFI" ]; then
+                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
+                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
+                run_in_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
             else
-                run_in_chroot "
-                    grub-install --target=i386-pc /dev/sda &&
-                    grub-mkconfig -o /boot/grub/grub.cfg
-                "
+                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && grub-mkconfig -o /boot/grub/grub.cfg"
             fi
             ;;
         debian|ubuntu)
-            echo -e "${YELLOW}Running Debian/Ubuntu GRUB repair...${RESET}"
-            if [ "$BOOT_MODE" = "1" ]; then
-                run_in_chroot "
-                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
-                    update-grub
-                "
+            if [ "$BOOT_MODE" = "UEFI" ]; then
+                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
+                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
+                run_in_chroot "update-grub"
             else
-                run_in_chroot "
-                    grub-install --target=i386-pc /dev/sda &&
-                    update-grub
-                "
+                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && update-grub"
             fi
             ;;
-        fedora)
-            echo -e "${YELLOW}Running Fedora GRUB repair...${RESET}"
-            if [ "$BOOT_MODE" = "1" ]; then
-                run_in_chroot "
-                    grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
-                    grub2-mkconfig -o /boot/grub2/grub.cfg
-                "
+        fedora|opensuse*|suse)
+            if [ "$BOOT_MODE" = "UEFI" ]; then
+                run_in_chroot "grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
+                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
+                run_in_chroot "grub2-mkconfig -o /boot/grub2/grub.cfg"
             else
-                run_in_chroot "
-                    grub2-install --target=i386-pc /dev/sda &&
-                    grub2-mkconfig -o /boot/grub2/grub.cfg
-                "
-            fi
-            ;;
-        opensuse*|suse)
-            echo -e "${YELLOW}Running openSUSE GRUB repair...${RESET}"
-            if [ "$BOOT_MODE" = "1" ]; then
-                run_in_chroot "
-                    grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
-                    grub2-mkconfig -o /boot/grub2/grub.cfg
-                "
-            else
-                run_in_chroot "
-                    grub2-install --target=i386-pc /dev/sda &&
-                    grub2-mkconfig -o /boot/grub2/grub.cfg
-                "
+                run_in_chroot "grub2-install --target=i386-pc /dev/sda --recheck && grub2-mkconfig -o /boot/grub2/grub.cfg"
             fi
             ;;
         nixos)
-            echo -e "${YELLOW}Running NixOS GRUB repair...${RESET}"
-            if [ "$BOOT_MODE" = "1" ]; then
-                sudo nixos-enter /mnt --command "
-                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
-                    nixos-rebuild boot
-                "
-            else
-                sudo nixos-enter /mnt --command "
-                    grub-install --target=i386-pc /dev/sda &&
-                    nixos-rebuild boot
-                "
-            fi
+            run_in_chroot "nixos-rebuild boot"
             ;;
         *)
-            echo -e "${RED}Unsupported distribution: $DISTRO${RESET}"
-            return 1
+            echo -e "${RED}Distro not automatically supported.${RESET}"
             ;;
     esac
 
-    echo -e "${GREEN}GRUB repair completed successfully.${RESET}"
+    echo -e "${GREEN}GRUB repair completed.${RESET}"
 }
 
 monitor_repair() {
@@ -820,11 +1014,11 @@ EOF
   echo -e "${YELLOW}=== Using Alias / Tutorial ===${RESET}"
     echo "Quick flags: -grub -monitor -initramfs -kernel -diag -update -bootcfg -auto"
     echo "Secret flags (These are not in the main menu, they may be unstable or something else, BE CAREFUL):"
-    echo "-grub-experimental"
+    echo "-experimental"
     echo "These are to go faster without selections"
     echo ''
     echo 'What is this?'
-    echo 'Simple, just use sudo ./boot-repair.sh or sudo boot-repair and add a -string for example -update'
+    echo 'Simple, just use sudo ./boot-repair.sh or sudo boot-repair and add a -string for example -grub'
     echo ''
     echo 'Write exit to test or just exit'
     local c; read -r -p ">> " c </dev/tty
@@ -929,13 +1123,7 @@ main_menu() {
     news
     echo ""
     echo -e "${GREEN}=== Options ===${RESET}"
-    echo "1) Repair Linux (Constantly updating to fully repair your Linux)"
     echo "${T[m1]}"
-    echo "3) Repair FreeBSD"
-    echo "4) New Repair Grub (Check for Errors)"
-    echo "5) Repair Systemd Boot"
-    echo "6) Repair EFInd"
-    echo "7) Repair Limine"
     echo "${T[m2]}"
     echo "${T[m3]}"
     echo "${T[m4]}"
@@ -943,28 +1131,22 @@ main_menu() {
     echo "${T[m6]}"
     echo "${T[m7]}"
     echo "${T[m8]}"
-    echo "15) Aliases (For GIT users Please install it in Settings)"
-    echo -e "${KOFI}16) Support me on Ko-fi! ☕${RESET}"
+    echo "9) Aliases (For GIT users Please install it in Settings)"
+    echo -e "${KOFI}10) Support me on Ko-fi! ☕${RESET}"
     echo "${T[m9]}"
     local choice; read -r -p "${T[enter_choice]} >> " choice </dev/tty
     case "$choice" in
-      1) repair_linux ;;
-      2) grub_repair ;;
-      3) repair_freebsd ;;
-      4) new-repair_grub ;;
-      5) repair_systemdbot ;;
-      6) repair_efind ;;
-      7) repair_limine ;;
-      8) monitor_repair ;;
-      9) regen_initramfs ;;
-      10) reinstall_kernel ;;
-      11) update_system ;;
-      12) boot_freedom ;;
-      13) diagnostics ;;
-      14) settings_menu ;;
-      15) alias_menu ;;
-      16) kofi_menu ;;
-      17) break ;;
+      1) grub_repair ;;
+      2) monitor_repair ;;
+      3) regen_initramfs ;;
+      4) reinstall_kernel ;;
+      5) update_system ;;
+      6) boot_freedom ;;
+      7) diagnostics ;;
+      8) settings_menu ;;
+      9) alias_menu ;;
+      10) kofi_menu ;;
+      11) break ;;
       *) echo -e "${RED}${T[invalid_sel]}${RESET}"; sleep 1 ;;
     esac
   done
@@ -972,7 +1154,7 @@ main_menu() {
 
 news() {
     echo -e "${BLUE}=== News ===${RESET}"
-    echo -e "${GREEN}Added Repair Linux and FreeBSD (7/10/25)${RESET}"
+    echo -e "${GREEN}New Update (25/1/26)${RESET}"
     echo -e "${KOFIAD}Added ko-fi for Support us! (help us, we are humble with an Intel i3 + 7/10/25)${RESET}"
     echo "New Edition for boot-repair called Dev (5/10/25)"
 }
@@ -1001,6 +1183,7 @@ case "${1:-}" in
   -boot-repair-ubuntu) boot-repair-ubuntu; exit 0 ;;
   -systemd) systemd_repair; exit 0 ;;
   -changelog) changelog_menu; exit 0 ;;
+  -experimental) grub_repair_experimental; exit 0 ;;
   -auto)
     # Fire-and-forget: try to auto-repair GRUB with defaults
     auto_detect_parts >/tmp/bootrepair_auto 2>/dev/null || true
