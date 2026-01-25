@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 #========================================================
-#  BootRepair v0.1.3
-#  License: MIT
-#  Description: Swiss-army live rescue tool: GRUB repair, display reset,
-#               initramfs, kernel, system update, boot freedom, diagnostics.
-#  Supports: Arch/EndeavourOS/CachyOS, Debian/Ubuntu/Mint/Pop, Fedora,
-#            openSUSE, NixOS (best-effort)
-#========================================================
-
-#!/usr/bin/env bash
-#========================================================
-#  BootRepair Dev 25/1/26
+#  BootRepair v0.1.2.1
 #  License: MIT
 #  Description: Swiss-army live rescue tool: GRUB repair, display reset,
 #               initramfs, kernel, system update, boot freedom, diagnostics.
@@ -23,8 +13,6 @@ START_TIME=$(date +%s)
 # Colors
 RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; BLUE="\e[34m"; CYAN="\e[36m"; RESET="\e[0m"
 RED_LIGHT='\033[1;31m'
-KOFI='\e[0;105m'
-KOFIAD="\e[1;95m"
 
 #-----------------------
 # Language (EN/ES/DE/PT)
@@ -48,13 +36,13 @@ if [[ "$LANG_CODE" == "en" ]]; then
   T[secure_unknown]="Unknown"
   T[menu_title]="Main menu"
   T[m1]="1) Repair GRUB"
-  T[m2]="2) Reset monitor configs (Wayland/Hyprland/Xorg)"
-  T[m3]="3) Regenerate initramfs"
-  T[m4]="4) Reinstall kernel"
-  T[m5]="5) Update operating system"
-  T[m6]="6) Boot freedom (timeout, default, EFI, os-prober)"
-  T[m7]="7) Quick diagnostics"
-  T[m8]="8) Settings (language, expert mode, install alias)"
+  T[m2]="3) Reset monitor configs (Wayland/Hyprland/Xorg)"
+  T[m3]="4) Regenerate initramfs"
+  T[m4]="5) Reinstall kernel"
+  T[m5]="6) Update operating system"
+  T[m6]="7) Boot freedom (timeout, default, EFI, os-prober)"
+  T[m7]="8) Quick diagnostics"
+  T[m8]="9) Settings (language, expert mode, install alias)"
   T[m9]="11) Exit"
   T[enter_choice]="Choose an option"
   T[press_enter]="Press Enter to continue..."
@@ -92,7 +80,7 @@ if [[ "$LANG_CODE" == "en" ]]; then
   T[settings_title]="Settings"
   T[set_lang]="1) Change language (EN)"
   T[set_expert]="2) Toggle expert mode"
-  T[set_install]="3) Install 'bootrepair' to /usr/local/bin (install Alias + Only for GIT version)"
+  T[set_install]="3) Install 'bootrepair' to /usr/local/bin (Only for GIT version)"
   T[back]="7) Back"
   T[expert_on]="Expert mode ENABLED"
   T[expert_off]="Expert mode DISABLED"
@@ -134,9 +122,7 @@ ascii_banner() {
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} Dev ===${RESET}"
-  echo ""
-  echo "Be careful what you touch in this Dev version!"
+  echo -e "${YELLOW}=== ${T[title]} v0.1.2.1 ===${RESET}"
   echo ""
 }
 
@@ -641,105 +627,145 @@ grub_repair() {
     fi
 }
 
-grub_repair_experimental() {
+systemd_repair() {
+  chmod +x *.sh
+  ./systemd.sh
+}
+
+grub_repair-classic() {
+    # Colors
     RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; CYAN="\e[36m"; RESET="\e[0m"
-    TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-    LOGFILE="/var/log/grub_repair_${TIMESTAMP}.log"
 
-    echo -e "${CYAN}=== GRUB Repair Experimental ===${RESET}"
-    [[ $EUID -ne 0 ]] && { echo -e "${RED}You must be root${RESET}"; return 1; }
-
-    # Detect distro
+    # Detect distribution
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         DISTRO=$ID
     else
-        echo -e "${RED}The distribution could not be detected.${RESET}"
+        echo -e "${RED}Cannot detect your distribution.${RESET}"
         return 1
     fi
-    echo -e "${GREEN}Distro detected:${RESET} $DISTRO"
+    echo -e "${GREEN}Detected distribution:${RESET} $DISTRO"
 
-    # Detect boot mode
-    if [ -d /sys/firmware/efi ]; then
-        BOOT_MODE="UEFI"
-    else
-        BOOT_MODE="BIOS"
-    fi
-    echo -e "${GREEN}Mode detected:${RESET} $BOOT_MODE"
-
-    # Ask partitions
-    read -rp "Root partition (e.g., /dev/sda2): " ROOT_PART
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        read -rp "EFI partition (e.g.: /dev/sda1): " EFI_PART
+    # Select boot mode
+    echo -e "${CYAN}Select boot mode:${RESET}"
+    echo "1) UEFI (recommended)"
+    echo "2) BIOS (Legacy)"
+    read -rp "Choice [1/2]: " BOOT_MODE
+    if [ "$BOOT_MODE" != "1" ] && [ "$BOOT_MODE" != "2" ]; then
+        echo -e "${RED}Invalid choice. Defaulting to UEFI.${RESET}"
+        BOOT_MODE=1
     fi
 
-    # Mount
-    mount "$ROOT_PART" /mnt || return 1
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        mkdir -p /mnt/boot/efi
-        mount "$EFI_PART" /mnt/boot/efi || return 1
+    # Confirm repair
+    echo -e "${YELLOW}WARNING:${RESET} This will modify your bootloader."
+    read -rp "Do you want to proceed? [y/N]: " CONFIRM
+    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Operation cancelled.${RESET}"
+        return 0
     fi
 
-    # Backup automático
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-        BACKUP_DIR="/mnt/boot/efi/EFI/Backup_${TIMESTAMP}"
-        mkdir -p "$BACKUP_DIR"
-        cp -a /mnt/boot/efi/EFI/* "$BACKUP_DIR"/ 2>/dev/null || true
-        efibootmgr -v > "$LOGFILE.nvram" 2>/dev/null || true
-        echo -e "${YELLOW}ESP backup in:${RESET} $BACKUP_DIR"
-        echo -e "${YELLOW}NVRAM entries stored in:${RESET} $LOGFILE.nvram"
+    # Mount partitions
+    read -rp "Enter your root partition (e.g., /dev/sda2): " ROOT_PART
+    if [ "$BOOT_MODE" = "1" ]; then
+        read -rp "Enter your EFI partition (e.g., /dev/sda1): " EFI_PART
+    fi
+    echo -e "${CYAN}Mounting partitions...${RESET}"
+    sudo mount "$ROOT_PART" /mnt
+    if [ "$BOOT_MODE" = "1" ]; then
+        sudo mount "$EFI_PART" /mnt/boot/efi
     fi
 
-    # Helper chroot
+    # Helper: run commands in chroot (prefers arch-chroot if available)
     run_in_chroot() {
         if command -v arch-chroot >/dev/null; then
-            arch-chroot /mnt /bin/bash -c "$1"
+            sudo arch-chroot /mnt /bin/bash -c "$1"
         else
-            mount --bind /dev /mnt/dev
-            mount --bind /proc /mnt/proc
-            mount --bind /sys /mnt/sys
-            chroot /mnt /bin/bash -c "$1"
+            sudo mount --bind /dev /mnt/dev
+            sudo mount --bind /proc /mnt/proc
+            sudo mount --bind /sys /mnt/sys
+            sudo chroot /mnt /bin/bash -c "$1"
         fi
     }
 
-    # Install GRUB
+    # Repair GRUB based on distro
     case "$DISTRO" in
         arch|endeavouros|cachyos)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+            echo -e "${YELLOW}Running Arch-based GRUB repair...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                run_in_chroot "
+                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    grub-mkconfig -o /boot/grub/grub.cfg
+                "
             else
-                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && grub-mkconfig -o /boot/grub/grub.cfg"
+                run_in_chroot "
+                    grub-install --target=i386-pc /dev/sda &&
+                    grub-mkconfig -o /boot/grub/grub.cfg
+                "
             fi
             ;;
         debian|ubuntu)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "update-grub"
+            echo -e "${YELLOW}Running Debian/Ubuntu GRUB repair...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                run_in_chroot "
+                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    update-grub
+                "
             else
-                run_in_chroot "grub-install --target=i386-pc /dev/sda --recheck && update-grub"
+                run_in_chroot "
+                    grub-install --target=i386-pc /dev/sda &&
+                    update-grub
+                "
             fi
             ;;
-        fedora|opensuse*|suse)
-            if [ "$BOOT_MODE" = "UEFI" ]; then
-                run_in_chroot "grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux --no-nvram --recheck"
-                run_in_chroot "cp -f /boot/efi/EFI/Linux/grubx64.efi /boot/efi/EFI/Boot/bootx64.efi || true"
-                run_in_chroot "grub2-mkconfig -o /boot/grub2/grub.cfg"
+        fedora)
+            echo -e "${YELLOW}Running Fedora GRUB repair...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                run_in_chroot "
+                    grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
             else
-                run_in_chroot "grub2-install --target=i386-pc /dev/sda --recheck && grub2-mkconfig -o /boot/grub2/grub.cfg"
+                run_in_chroot "
+                    grub2-install --target=i386-pc /dev/sda &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
+            fi
+            ;;
+        opensuse*|suse)
+            echo -e "${YELLOW}Running openSUSE GRUB repair...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                run_in_chroot "
+                    grub2-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
+            else
+                run_in_chroot "
+                    grub2-install --target=i386-pc /dev/sda &&
+                    grub2-mkconfig -o /boot/grub2/grub.cfg
+                "
             fi
             ;;
         nixos)
-            run_in_chroot "nixos-rebuild boot"
+            echo -e "${YELLOW}Running NixOS GRUB repair...${RESET}"
+            if [ "$BOOT_MODE" = "1" ]; then
+                sudo nixos-enter /mnt --command "
+                    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Linux &&
+                    nixos-rebuild boot
+                "
+            else
+                sudo nixos-enter /mnt --command "
+                    grub-install --target=i386-pc /dev/sda &&
+                    nixos-rebuild boot
+                "
+            fi
             ;;
         *)
-            echo -e "${RED}Distro not automatically supported.${RESET}"
+            echo -e "${RED}Unsupported distribution: $DISTRO${RESET}"
+            return 1
             ;;
     esac
 
-    echo -e "${GREEN}GRUB repair completed.${RESET}"
+    echo -e "${GREEN}GRUB repair completed successfully.${RESET}"
 }
 
 monitor_repair() {
@@ -1024,11 +1050,11 @@ EOF
   echo -e "${YELLOW}=== Using Alias / Tutorial ===${RESET}"
     echo "Quick flags: -grub -monitor -initramfs -kernel -diag -update -bootcfg -auto"
     echo "Secret flags (These are not in the main menu, they may be unstable or something else, BE CAREFUL):"
-    echo "-experimental"
+    echo "-grub-experimental"
     echo "These are to go faster without selections"
     echo ''
     echo 'What is this?'
-    echo 'Simple, just use sudo ./boot-repair.sh or sudo boot-repair and add a -string for example -grub'
+    echo 'Simple, just use sudo ./boot-repair.sh or sudo boot-repair and add a -string for example -update'
     echo ''
     echo 'Write exit to test or just exit'
     local c; read -r -p ">> " c </dev/tty
@@ -1036,26 +1062,6 @@ EOF
     exit) break ;;
     esac
   done
-}
-
-kofi_menu() {
-  echo -e "${CYAN}"
-  cat << "EOF"
- _  __ ____        _____ _ 
-/ |/ //  _ \      /    // \
-|   / | / \|_____ |  __\| |
-|   \ | \_/|\____\| |   | |
-\_|\_\\____/      \_/   \_/ ☕
-EOF
-  echo -e "${RESET}"
-  echo -e "${YELLOW}=== Support the Project ===${RESET}"
-    echo "Thanks for supporting us! This helps us get more updates and more work (obviously) out on our independent project."
-    echo ""
-    echo "Exclusive versions of early access and delayed releases coming soon!"
-    echo -e "${BLUE} URL : https://ko-fi.com/andrew4630 ${RESET}"
-    echo "If you are interested go to the link"
-    echo ""
-    pause
 }
 
 changelog_menu() {
@@ -1125,8 +1131,6 @@ main_menu() {
     RANDOM_TIP=$(echo "$TIPS" | shuf -n 1)
 
     echo ""
-    echo -e "${KOFIAD}Support me on Ko-fi to bring in more updates and give me more work than ever!${RESET}"
-    echo ""
     echo -e "${RED_LIGHT}TIP (boot-repair and Terminal tips):${RESET}"
     echo "$RANDOM_TIP"
     echo ""
@@ -1134,6 +1138,7 @@ main_menu() {
     echo ""
     echo -e "${GREEN}=== Options ===${RESET}"
     echo "${T[m1]}"
+    echo "2) Repair GRUB Classic (most Stable + Recommended)"
     echo "${T[m2]}"
     echo "${T[m3]}"
     echo "${T[m4]}"
@@ -1141,21 +1146,20 @@ main_menu() {
     echo "${T[m6]}"
     echo "${T[m7]}"
     echo "${T[m8]}"
-    echo "9) Aliases (For GIT users Please install it in Settings)"
-    echo -e "${KOFI}10) Support me on Ko-fi! ☕${RESET}"
+    echo "10) Aliases (For GIT users Please install it in Settings)"
     echo "${T[m9]}"
     local choice; read -r -p "${T[enter_choice]} >> " choice </dev/tty
     case "$choice" in
-      1) grub_repair ;;
-      2) monitor_repair ;;
-      3) regen_initramfs ;;
-      4) reinstall_kernel ;;
-      5) update_system ;;
-      6) boot_freedom ;;
-      7) diagnostics ;;
-      8) settings_menu ;;
-      9) alias_menu ;;
-      10) kofi_menu ;;
+      1) disabled ;;
+      2) grub_repair-classic ;;
+      3) monitor_repair ;;
+      4) regen_initramfs ;;
+      5) reinstall_kernel ;;
+      6) update_system ;;
+      7) boot_freedom ;;
+      8) diagnostics ;;
+      9) settings_menu ;;
+      10) alias_menu ;;
       11) break ;;
       *) echo -e "${RED}${T[invalid_sel]}${RESET}"; sleep 1 ;;
     esac
@@ -1164,9 +1168,7 @@ main_menu() {
 
 news() {
     echo -e "${BLUE}=== News ===${RESET}"
-    echo -e "${GREEN}New Update (25/1/26)${RESET}"
-    echo -e "${KOFIAD}Added ko-fi for Support us! (help us, we are humble with an Intel i3 + 7/10/25)${RESET}"
-    echo "New Edition for boot-repair called Dev (5/10/25)"
+    echo "New Edition for boot-repair called Rolling-Release (5/10/25)"
 }
 
 disabled() {
@@ -1189,11 +1191,9 @@ case "${1:-}" in
   -update) update_system; exit 0 ;;
   -bootcfg) boot_freedom; exit 0 ;;
   -aliases) alias_menu; exit 0 ;;
-  -repair-linux) repair_linux; exit 0 ;;
   -boot-repair-ubuntu) boot-repair-ubuntu; exit 0 ;;
   -systemd) systemd_repair; exit 0 ;;
   -changelog) changelog_menu; exit 0 ;;
-  -experimental) grub_repair_experimental; exit 0 ;;
   -auto)
     # Fire-and-forget: try to auto-repair GRUB with defaults
     auto_detect_parts >/tmp/bootrepair_auto 2>/dev/null || true

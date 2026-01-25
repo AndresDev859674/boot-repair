@@ -1042,7 +1042,7 @@ EOF
     echo "Thanks for supporting us! This helps us get more updates and more work (obviously) out on our independent project."
     echo ""
     echo "Exclusive versions of early access and delayed releases coming soon!"
-    echo "URL : link coming lol"
+    echo -e "${BLUE} URL : https://ko-fi.com/andrew4630 ${RESET}"
     echo "If you are interested go to the link"
     echo ""
     pause
