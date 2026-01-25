@@ -25,6 +25,10 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 
 ---
 
+> [!WARNING]
+> Use this with caution. This isn't perfect yet.
+>
+
 ### Seccions
   - [Supported Distros](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#-supported-distributions)
   - [Prerequisites](https://github.com/AndresDev859674/boot-repair/tree/main?tab=readme-ov-file#-prerequisites)
