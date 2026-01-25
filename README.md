@@ -168,6 +168,11 @@ Just open the terminal and put this comand
     
 ### Manual installation (***more time...***)
 
+1. **Cloning**
+    ```bash
+    git clone https://github.com/AndresDev859674/boot-repair.git && cd boot-repair && chmod +x *.sh && sudo ./boot-repair.sh
+    ```
+   
 2. **Navigate into the project folder**
     ```bash
     cd boot-repair
