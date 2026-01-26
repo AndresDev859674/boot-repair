@@ -8,16 +8,6 @@
 #            openSUSE, NixOS (best-effort)
 #========================================================
 
-#!/usr/bin/env bash
-#========================================================
-#  BootRepair Dev 25/1/26
-#  License: MIT
-#  Description: Swiss-army live rescue tool: GRUB repair, display reset,
-#               initramfs, kernel, system update, boot freedom, diagnostics.
-#  Supports: Arch/EndeavourOS/CachyOS, Debian/Ubuntu/Mint/Pop, Fedora,
-#            openSUSE, NixOS (best-effort)
-#========================================================
-
 START_TIME=$(date +%s)
 
 # Colors
@@ -134,9 +124,7 @@ ascii_banner() {
  `---'  `---'  `---'   `--'         `--'    `----'|  |-'  `--`--'`--'`--'   
 EOF
   echo -e "${RESET}"
-  echo -e "${YELLOW}=== ${T[title]} Dev ===${RESET}"
-  echo ""
-  echo "Be careful what you touch in this Dev version!"
+  echo -e "${YELLOW}=== ${T[title]} 0.1.3 ===${RESET}"
   echo ""
 }
 
