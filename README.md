@@ -29,6 +29,7 @@ Perfect for use from a **live environment** when your motherboard fails to detec
 
 > [!WARNING]
 > Use this with caution. This isn't perfect yet.
+> * **If you use an immutable distro this Script doesn't work**
 >
 
 ### Seccions
