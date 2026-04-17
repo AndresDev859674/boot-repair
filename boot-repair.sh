@@ -384,7 +384,7 @@ grub_repair() {
     fi
 
     # Check for necessary dependencies
-    for cmd in lsblk mount umount chroot grub-install; do
+    for cmd in lsblk mount umount chroot ${grub_install_cmd}; do
         if ! command -v "$cmd" &>/dev/null; then
             echo -e "${RED}Error: Required command '${BOLD}$cmd${RESET}${RED}' not found. Please install it.${RESET}"
             exit 1
@@ -571,7 +571,7 @@ grub_repair() {
             grub_config_cmd="update-grub"
             pkg_manager_cmd="apt-get update && apt-get install --reinstall -y grub-common grub-efi-${grub_target_arch}-signed shim-signed"
             ;;
-        fedora|centos|rhel)
+        fedora|centos|rhel|rocky|almalinux)
             grub_install_cmd="grub2-install"
             grub_config_cmd="grub2-mkconfig -o /boot/grub2/grub.cfg"
             pkg_manager_cmd="dnf reinstall -y grub2-efi-${grub_target_arch} shim-${grub_target_arch}"
@@ -595,8 +595,13 @@ grub_repair() {
             secure_boot_fix="$pkg_manager_cmd && "
         fi
 
-        # The bootloader-id is the name that will appear in the BIOS/UEFI boot menu
-        full_command="${secure_boot_fix}${grub_install_cmd} --target=${grub_target_arch}-efi --efi-directory=${grub_efi_dir} --bootloader-id=GRUB --recheck && ${grub_config_cmd}"
+        if command -v rpm &>/dev/null; then
+            full_command="${grub_config_cmd}"
+        else
+            # The bootloader-id is the name that will appear in the BIOS/UEFI boot menu
+            full_command="${secure_boot_fix}${grub_install_cmd} --target=${grub_target_arch}-efi --efi-directory=${grub_efi_dir} \
+                --bootloader-id=GRUB --recheck && ${grub_config_cmd}"
+        fi
 
     else # BIOS Mode
         local target_disk=""
@@ -770,7 +775,7 @@ reinstall_kernel() {
     case "$ID" in
       arch|endeavouros|cachyos) chroot /mnt /bin/bash -c 'pacman -Sy --noconfirm linux || true; mkinitcpio -P || true' ;;
       debian|ubuntu|linuxmint|pop) chroot /mnt /bin/bash -c 'apt-get update && apt-get install -y --reinstall linux-image-generic || true; update-initramfs -u -k all || true' ;;
-      fedora) chroot /mnt /bin/bash -c 'dnf -y reinstall kernel-core || true; dracut --regenerate-all --force || true' ;;
+      fedora|rhel|rocky|almalinux) chroot /mnt /bin/bash -c 'dnf -y reinstall kernel-core || true; dracut --regenerate-all --force || true' ;;
       opensuse*|suse) chroot /mnt /bin/bash -c 'zypper -n in -f kernel-default || true; dracut --regenerate-all --force || true' ;;
       nixos) chroot /mnt /bin/bash -c 'nixos-rebuild boot || true' ;;
       *) echo -e "${RED}Unsupported distro for kernel reinstall.${RESET}" ;;
@@ -790,7 +795,7 @@ update_system() {
     case "$ID" in
       arch|endeavouros|cachyos) chroot /mnt /bin/bash -c 'pacman -Syu --noconfirm' ;;
       debian|ubuntu|linuxmint|pop) chroot /mnt /bin/bash -c 'apt-get update && apt-get dist-upgrade -y' ;;
-      fedora) chroot /mnt /bin/bash -c 'dnf -y upgrade --refresh' ;;
+      fedora|rhel|rocky|almalinux) chroot /mnt /bin/bash -c 'dnf -y upgrade --refresh' ;;
       opensuse*|suse) chroot /mnt /bin/bash -c 'zypper -n refresh && zypper -n dup --allow-vendor-change' ;;
       nixos) chroot /mnt /bin/bash -c 'nixos-rebuild switch --upgrade || nixos-rebuild boot --upgrade || true' ;;
       *) echo -e "${RED}Unsupported distro for update.${RESET}" ;;
@@ -864,7 +869,7 @@ enable_os_prober() {
         debian|ubuntu|linuxmint|pop)
           chroot /mnt /bin/bash -c 'apt-get update && apt-get install -y os-prober'
           ;;
-        fedora)
+        fedora|rhel|rocky|almalinux)
           chroot /mnt /bin/bash -c 'dnf -y install os-prober' || true
           ;;
         opensuse*|suse)
